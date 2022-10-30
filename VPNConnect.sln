@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.3.32901.215
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VPNConnect", "VpnConnectApp\VPNConnect.csproj", "{EEADCD45-61F9-4C8E-8178-3AEE416BE5B2}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VPNConnectTests", "VPNConnectTests\VPNConnectTests.csproj", "{DA5D8EED-64CD-4098-B60A-19B4CB5010E8}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GeoIpUtils", "GeoIpUtils\GeoIpUtils.csproj", "{B43328C9-AE57-46A9-AB44-2177D3045C03}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{EEADCD45-61F9-4C8E-8178-3AEE416BE5B2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EEADCD45-61F9-4C8E-8178-3AEE416BE5B2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EEADCD45-61F9-4C8E-8178-3AEE416BE5B2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EEADCD45-61F9-4C8E-8178-3AEE416BE5B2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DA5D8EED-64CD-4098-B60A-19B4CB5010E8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DA5D8EED-64CD-4098-B60A-19B4CB5010E8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DA5D8EED-64CD-4098-B60A-19B4CB5010E8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DA5D8EED-64CD-4098-B60A-19B4CB5010E8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B43328C9-AE57-46A9-AB44-2177D3045C03}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B43328C9-AE57-46A9-AB44-2177D3045C03}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B43328C9-AE57-46A9-AB44-2177D3045C03}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B43328C9-AE57-46A9-AB44-2177D3045C03}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {68EBBEBB-0768-4467-9B39-995B334F9A1E}
+	EndGlobalSection
+EndGlobal
