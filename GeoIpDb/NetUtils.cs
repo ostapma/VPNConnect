@@ -5,12 +5,12 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace VPNConnect.Net
+namespace GeoIp
 {
 
     public static class NetUtils
     {
-        public static long IpToInt(string ipString)
+        public static long IpToHex(string ipString)
         {
             var ipNum = ipString.Split('.');
 

@@ -1,5 +1,6 @@
 ﻿using NonInvasiveKeyboardHookLibrary;
 using System.Runtime.InteropServices;
+using VpnConnect.Configuration;
 using VPNConnect;
 using VPNConnect.Configuration;
 using VPNConnect.UIHandling;
@@ -31,13 +32,15 @@ while (vpnService==null)
 
 }
 
+VpnSearchSettings settings = ConfigManager.Get().Settings();
+
 Console.WriteLine($"Put your mouse cursor on {vpnService} VPN client's connection button center");
-Console.WriteLine($"Press {config.ConsoleSettings.StartHotKey} to start {vpnService} VPN searching");
+Console.WriteLine($"Press {settings.ConsoleSettings.StartHotKey} to start {vpnService} VPN searching");
 
 IVpnUiHandler vpnUiHandler = UiHandlerFactory.GetHandler(vpnService.Value);
 
-VpnSearcher searcher = new(vpnUiHandler, config.ConsoleSettings, config.VpnUiHandlingSettings, config.NetAnanlyzeSettings,
-    config.GeoIpDbSettings, config.ExternalIpServiceLink);
+
+VpnSearcher searcher = new(vpnUiHandler, settings);
 
 try
 {

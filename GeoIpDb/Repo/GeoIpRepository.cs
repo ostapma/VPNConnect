@@ -6,9 +6,9 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
-using VPNConnect.GeoIp.Entities;
+using GeoIp.Entities;
 
-namespace VPNConnect.GeoIp
+namespace GeoIp.Repo
 {
     public class GeoIpRepository
     {
@@ -26,11 +26,11 @@ namespace VPNConnect.GeoIp
                     FROM CityIP where CityIPID = @id", new { id });
         }
 
-        public GeoIpCity GetByIpAddress(long ipHex)
+        public GeoIpCity GetByIpAddress(string ip)
         {
             return connection.QueryFirst<GeoIpCity>(@"SELECT CityIPID, IPRangeStart, IPRangeEnd, 
                     ContinentID, CountryID, RegionName, CityName
-                    FROM CityIP where @ip > IPRangeStartHex and @ip < IPRangeEndHex", new { ip = ipHex });
+                    FROM CityIP where @ip > IPRangeStartHex and @ip < IPRangeEndHex", new { ip = NetUtils.IpToHex(ip) });
         }
 
         public IEnumerable<GeoIpCity> GetPage(long startId, long count)
@@ -45,10 +45,11 @@ namespace VPNConnect.GeoIp
             return connection.QueryFirst<long>(@"SELECT count(1) FROM CityIP");
         }
 
-        public void UpdateHexIp(long cityIpId, long startIpHex, long endIpHex)
+        public void UpdateHexIp(long cityIpId, string startIp, string endIp)
         {
             connection.Execute(@"Update CityIP set IPRangeStartHex = @startIpHex, 
-                IPRangeEndHex = @endIpHex where CityIPID = @cityIpId", new { startIpHex, endIpHex, cityIpId });
+                IPRangeEndHex = @endIpHex where CityIPID = @cityIpId", new { startIpHex= NetUtils.IpToHex(startIp), 
+                endIpHex= NetUtils.IpToHex(endIp), cityIpId });
         }
 
         //public GeoIpCity FindCityByIp(string ipAddress)

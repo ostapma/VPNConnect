@@ -16,7 +16,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\VpnConnectApp\VPNConnect.csproj" />
+    <ProjectReference Include="..\GeoIpDb\GeoIpDb.csproj" />
+    <ProjectReference Include="..\VpnConnectApp\VpnConnect.csproj" />
   </ItemGroup>
 
 </Project>

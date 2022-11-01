@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace VPNConnect.GeoIp.Entities
+namespace GeoIp.Entities
 {
     public class GeoIpCity
     {

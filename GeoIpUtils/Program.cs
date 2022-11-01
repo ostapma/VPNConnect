@@ -6,4 +6,6 @@ Log.Logger = new LoggerConfiguration().WriteTo.Console().CreateLogger();
 
 IpToHexConvertor convertor = new();
 
+Console.WriteLine("Populating IP address ranges converted to HEX for speeding up searches");
+
 convertor.ConvertForCity();

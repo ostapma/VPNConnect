@@ -8,6 +8,7 @@ using Serilog;
 using System.Net.NetworkInformation;
 using VPNConnect.UIHandling;
 using VPNConnect.Net;
+using VpnConnect.Configuration;
 
 namespace VPNConnect
 {
@@ -16,48 +17,40 @@ namespace VPNConnect
         bool isStarted = false;
         KeyboardHookManager keyboardHookManager = new();
         private readonly IVpnUiHandler vpnUiHandler;
-        private readonly ConsoleSettings consoleSettings;
-        private readonly VpnUiHandlingSettings vpnUiHandlingSettings;
-        private readonly NetAnanlyzeSettings netAnanlyzeSettings;
-        private readonly GeoIpDbSettings geoIpDbSettings;
-        private readonly string externalIpServiceLink;
+        private readonly VpnSearchSettings settings;
         private string disconnectedExternalIp = "";
 
 
-        public VpnSearcher(IVpnUiHandler vpnUiHandler , ConsoleSettings consoleSettings,
-            VpnUiHandlingSettings vpnUiHandlingSettings, NetAnanlyzeSettings netAnanlyzeSettings,
-            GeoIpDbSettings geoIpDbSettings, string externalIpServiceLink
+        public VpnSearcher(IVpnUiHandler vpnUiHandler , VpnSearchSettings settings
             )
         {
             this.vpnUiHandler = vpnUiHandler;
-            this.consoleSettings = consoleSettings;
-            this.vpnUiHandlingSettings = vpnUiHandlingSettings;
-            this.netAnanlyzeSettings = netAnanlyzeSettings;
-            this.geoIpDbSettings = geoIpDbSettings;
-            this.externalIpServiceLink = externalIpServiceLink;
+            this.settings = settings;
         }
 
         public void StartHotkey()
         {
-            ExternalIpServiceProvider externalIpServiceProvider = new ExternalIpServiceProvider(externalIpServiceLink);
+            ExternalIpServiceProvider externalIpServiceProvider = new ExternalIpServiceProvider(settings.ExternalIpServiceLink );
+            disconnectedExternalIp = externalIpServiceProvider.GetMyIp();
             Log.Information($"My IP is {disconnectedExternalIp}");
-            var geoIpRepository = new GeoIp.GeoIpRepository(geoIpDbSettings.ConnectionString);
+            var geoIpRepository = new GeoIp.Repo.GeoIpRepository(settings.GeoIpDbSettings.ConnectionString);
             keyboardHookManager.Start();
 
-            keyboardHookManager.RegisterHotkey(GetVcode(consoleSettings.StopHotKey), () =>
+            keyboardHookManager.RegisterHotkey(GetVcode(settings.ConsoleSettings.StopHotKey), () =>
             {
-                Log.Information($"{consoleSettings.StopHotKey} pressed");
+                Log.Information($"{settings.ConsoleSettings.StopHotKey} pressed");
                 Log.Information("VPN searching is stopping");
                 isStarted = false;
             });
 
-            keyboardHookManager.RegisterHotkey(GetVcode(consoleSettings.StartHotKey), () =>
+            keyboardHookManager.RegisterHotkey(GetVcode(settings.ConsoleSettings.StartHotKey), () =>
             {
                 if (isStarted) return;
-                Log.Information($"{consoleSettings.StartHotKey} pressed");
+                Log.Information($"{settings.ConsoleSettings.StartHotKey} pressed");
                 Log.Information("VPN searching is started");
 
-                NetQualityAnalyzer netQualityAnalyzer = new(netAnanlyzeSettings.PingTarget, netAnanlyzeSettings.PingHops, netAnanlyzeSettings.BlacklistCountries);
+                NetQualityAnalyzer netQualityAnalyzer = new(settings.NetAnanlyzeSettings.PingTarget,
+                    settings.NetAnanlyzeSettings.PingHops, settings.NetAnanlyzeSettings.BlacklistCountries);
 
                 isStarted = true;
                 while (isStarted)
@@ -68,11 +61,11 @@ namespace VPNConnect
 
                         vpnUiHandler.PressConnect();
 
-                        Log.Information($"Waiting for VPN connection {vpnUiHandlingSettings.ConnectTimeoutSec} sec");
+                        Log.Information($"Waiting for VPN connection {settings.VpnUiHandlingSettings.ConnectTimeoutSec} sec");
 
                         int connectionTimeSec = 0;
                         string connectedExternalIp = disconnectedExternalIp;
-                        while(connectionTimeSec< vpnUiHandlingSettings.ConnectTimeoutSec && connectedExternalIp== disconnectedExternalIp)
+                        while(connectionTimeSec< settings.VpnUiHandlingSettings.ConnectTimeoutSec && connectedExternalIp== disconnectedExternalIp)
                         {
                             Thread.Sleep(SecToMs(1));
                             connectionTimeSec++;
@@ -102,7 +95,7 @@ namespace VPNConnect
                         {
                             Log.Information($"Connected. My IP: {connectedExternalIp}");
 
-                            var geoiInfo = geoIpRepository.GetByIpAddress(NetUtils.IpToInt(connectedExternalIp));
+                            var geoiInfo = geoIpRepository.GetByIpAddress(connectedExternalIp);
 
                             if (geoiInfo != null) {
                                 Log.Information($"The VPN geoip info: countryID: {geoiInfo.CountryID} city: {geoiInfo.CityName}");
@@ -121,8 +114,8 @@ namespace VPNConnect
                             }
                             else
                             {
-                                Log.Information($"Started network quality analyzing with {netAnanlyzeSettings.PingTarget} as target");
-                                netQuality = netQualityAnalyzer.Analyze(netAnanlyzeSettings.TolerablePacketLoss);
+                                Log.Information($"Started network quality analyzing with {settings.NetAnanlyzeSettings.PingTarget} as target");
+                                netQuality = netQualityAnalyzer.Analyze(settings.NetAnanlyzeSettings.TolerablePacketLoss);
                                 if (netQuality.IsValid)
                                     Log.Information($"Packets lost: {netQuality.LostPackets}; avg latency: {netQuality.AvgLatency}");
                                 else
@@ -132,20 +125,20 @@ namespace VPNConnect
                             if (isCountryBlacklisted
                                 || netQuality==null
                                 || !netQuality.IsValid 
-                                || netQuality.LostPackets > netAnanlyzeSettings.TolerablePacketLoss 
-                                || netQuality.AvgLatency > netAnanlyzeSettings.TolerableLatencySec)
+                                || netQuality.LostPackets > settings.NetAnanlyzeSettings.TolerablePacketLoss 
+                                || netQuality.AvgLatency > settings.NetAnanlyzeSettings.TolerableLatencySec)
                             {
                                 Log.Information("The VPN is no good");
                                 Log.Information("Disconnecting");
                                 Log.Information("Simulate mouse left click on VPN client DISCONNECT button");
                                 vpnUiHandler.PressDisconnect();
-                                Log.Information($"Waiting for disconnect {vpnUiHandlingSettings.ConnectTimeoutSec} sec");
-                                Thread.Sleep(SecToMs(vpnUiHandlingSettings.ConnectTimeoutSec));
+                                Log.Information($"Waiting for disconnect {settings.VpnUiHandlingSettings.ConnectTimeoutSec} sec");
+                                Thread.Sleep(SecToMs(settings.VpnUiHandlingSettings.ConnectTimeoutSec));
 
                             }
                             else
                             {
-                                Log.Information("The VPN is good, let's stop");
+                                Log.Information("The VPN is good enough, let's stop here");
                                 isStarted = false;
                             }
                         }
@@ -177,8 +170,8 @@ namespace VPNConnect
         public void StopHotkey()
         {
             isStarted = false;
-            keyboardHookManager.UnregisterHotkey(GetVcode(consoleSettings.StopHotKey));
-            keyboardHookManager.UnregisterHotkey(GetVcode(consoleSettings.StartHotKey));
+            keyboardHookManager.UnregisterHotkey(GetVcode(settings.ConsoleSettings.StopHotKey));
+            keyboardHookManager.UnregisterHotkey(GetVcode(settings.ConsoleSettings.StartHotKey));
         }
     }
 }

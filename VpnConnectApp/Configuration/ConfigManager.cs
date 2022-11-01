@@ -4,11 +4,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using VpnConnect.Configuration;
 using VPNConnect.Net;
 
 namespace VPNConnect.Configuration
 {
-   
+
 
     internal class ConfigManager
     {
@@ -35,46 +36,19 @@ namespace VPNConnect.Configuration
 
         }
 
-
-        public ConsoleSettings ConsoleSettings {
-
-            get
-            {
-                return config.GetSection("consoleSettings").Get<ConsoleSettings>();
-            }
-        }
-
-        public VpnUiHandlingSettings VpnUiHandlingSettings
+        public VpnSearchSettings Settings()
         {
-            get
+            return new VpnSearchSettings()
             {
-                return config.GetSection("vpnUiHandlingSettings").Get<VpnUiHandlingSettings>();
-            }
+                ConsoleSettings = config.GetSection("consoleSettings").Get<ConsoleSettings>(),
+                VpnUiHandlingSettings = config.GetSection("vpnUiHandlingSettings").Get<VpnUiHandlingSettings>(),
+                NetAnanlyzeSettings = config.GetSection("netAnanlyzeSettings").Get<NetAnanlyzeSettings>(),
+                GeoIpDbSettings = config.GetSection("geoIpDbSettings").Get<GeoIpDbSettings>(),
+                ExternalIpServiceLink = config.GetSection("ExternalIpServiceLink").Get<string>()
+            };
         }
 
-        public NetAnanlyzeSettings NetAnanlyzeSettings
-        {
-            get
-            {
-                return config.GetSection("netAnanlyzeSettings").Get<NetAnanlyzeSettings>();
-            }
-        }
-
-        public GeoIpDbSettings GeoIpDbSettings
-        {
-            get
-            {
-                return config.GetSection("geoIpDbSettings").Get<GeoIpDbSettings>();
-            }
-        }
-
-        public string ExternalIpServiceLink
-        {
-            get
-            {
-                return config.GetSection("ExternalIpServiceLink").Get<string>();
-            }
-        }
+       
     }
 
 }

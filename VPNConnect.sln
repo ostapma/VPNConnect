@@ -3,11 +3,18 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.3.32901.215
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VPNConnect", "VpnConnectApp\VPNConnect.csproj", "{EEADCD45-61F9-4C8E-8178-3AEE416BE5B2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VpnConnect", "VpnConnectApp\VpnConnect.csproj", "{EEADCD45-61F9-4C8E-8178-3AEE416BE5B2}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VPNConnectTests", "VPNConnectTests\VPNConnectTests.csproj", "{DA5D8EED-64CD-4098-B60A-19B4CB5010E8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VpnConnectTests", "VPNConnectTests\VpnConnectTests.csproj", "{DA5D8EED-64CD-4098-B60A-19B4CB5010E8}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GeoIpUtils", "GeoIpUtils\GeoIpUtils.csproj", "{B43328C9-AE57-46A9-AB44-2177D3045C03}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GeoIpDbUtils", "GeoIpUtils\GeoIpDbUtils.csproj", "{B43328C9-AE57-46A9-AB44-2177D3045C03}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{12F7E5E1-F4CE-4669-B9E3-95FCEC58CD89}"
+	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GeoIpDb", "GeoIpDb\GeoIpDb.csproj", "{0D357E43-2B21-4682-ADDE-7E923B17CE66}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,6 +34,10 @@ Global
 		{B43328C9-AE57-46A9-AB44-2177D3045C03}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B43328C9-AE57-46A9-AB44-2177D3045C03}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B43328C9-AE57-46A9-AB44-2177D3045C03}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0D357E43-2B21-4682-ADDE-7E923B17CE66}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0D357E43-2B21-4682-ADDE-7E923B17CE66}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0D357E43-2B21-4682-ADDE-7E923B17CE66}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0D357E43-2B21-4682-ADDE-7E923B17CE66}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

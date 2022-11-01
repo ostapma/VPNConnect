@@ -6,8 +6,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Serilog;
-using VPNConnect.GeoIp;
 using VPNConnect.Net;
+using GeoIp.Entities;
+using GeoIp.Repo;
 
 namespace GeoIpUtils.IpToHex
 {
@@ -32,7 +33,7 @@ namespace GeoIpUtils.IpToHex
 
                     foreach (var cityIp in page)
                     {
-                        geoIpRepository.UpdateHexIp(cityIp.CityIpId, NetUtils.IpToInt(cityIp.IpRangeStart), NetUtils.IpToInt(cityIp.IpRangeEnd));
+                        geoIpRepository.UpdateHexIp(cityIp.CityIpId, cityIp.IpRangeStart, cityIp.IpRangeEnd);
                     }
                     page = geoIpRepository.GetPage(page.Last().CityIpId, pageSize);
                 }
