@@ -111,36 +111,35 @@ namespace VPNConnect
                             if (isCountryBlacklisted)
                             {
                                 Log.Information($"The VPN country is in your blacklist");
+                                Disconect();
                             }
                             else
                             {
                                 Log.Information($"Started network quality analyzing with {settings.NetAnanlyzeSettings.PingTarget} as target");
                                 netQuality = netQualityAnalyzer.Analyze(settings.NetAnanlyzeSettings.TolerablePacketLoss);
                                 if (netQuality.IsValid)
+                                {
                                     Log.Information($"Packets lost: {netQuality.LostPackets}; avg latency: {netQuality.AvgLatency}");
+                                    if (netQuality.LostPackets < settings.NetAnanlyzeSettings.TolerablePacketLoss
+                                        && netQuality.AvgLatency < settings.NetAnanlyzeSettings.TolerableLatencySec)
+                                    {
+                                        Log.Information("The VPN is good enough, let's stop here");
+                                        isStarted = false;
+                                    }
+                                    else
+                                    {
+                                        Log.Information("The VPN connection is no good");
+                                        Disconect();
+                                    }
+                                }
                                 else
+                                {
                                     Log.Information("Latency analyzing was unsuccesfull");
+                                    Disconect();
+                                }
+                                 
                             }
 
-                            if (isCountryBlacklisted
-                                || netQuality==null
-                                || !netQuality.IsValid 
-                                || netQuality.LostPackets > settings.NetAnanlyzeSettings.TolerablePacketLoss 
-                                || netQuality.AvgLatency > settings.NetAnanlyzeSettings.TolerableLatencySec)
-                            {
-                                Log.Information("The VPN is no good");
-                                Log.Information("Disconnecting");
-                                Log.Information("Simulate mouse left click on VPN client DISCONNECT button");
-                                vpnUiHandler.PressDisconnect();
-                                Log.Information($"Waiting for disconnect {settings.VpnUiHandlingSettings.ConnectTimeoutSec} sec");
-                                Thread.Sleep(SecToMs(settings.VpnUiHandlingSettings.ConnectTimeoutSec));
-
-                            }
-                            else
-                            {
-                                Log.Information("The VPN is good enough, let's stop here");
-                                isStarted = false;
-                            }
                         }
 
 
@@ -155,6 +154,15 @@ namespace VPNConnect
                 Log.Information("VPN searching has stopped");
 
             });
+        }
+
+        private void Disconect()
+        {
+            Log.Information("Disconnecting");
+            Log.Information("Simulate mouse left click on VPN client DISCONNECT button");
+            vpnUiHandler.PressDisconnect();
+            Log.Information($"Waiting for disconnect {settings.VpnUiHandlingSettings.ConnectTimeoutSec} sec");
+            Thread.Sleep(SecToMs(settings.VpnUiHandlingSettings.ConnectTimeoutSec));
         }
 
         private int GetVcode(string code)
