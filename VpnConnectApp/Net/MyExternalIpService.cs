@@ -19,9 +19,22 @@ namespace VPNConnect.Net
 
         public string GetMyIp()
         {
-            var externalIpStringTask = new HttpClient().GetStringAsync(externalIpServiceLink);
-
-            return externalIpStringTask.Result.Replace("\\r\\n", "").Replace("\\n", "").Trim();
+            try
+            {
+                var externalIpStringTask = new HttpClient().GetStringAsync(externalIpServiceLink);
+                return externalIpStringTask.Result.Replace("\\r\\n", "").Replace("\\n", "").Trim();
+            }
+            catch (HttpRequestException ex)
+            {
+                Log.Debug($"Can't connect to myIp service {ex}");
+            }
+            catch (AggregateException ex)
+            {
+                if (ex.InnerException is HttpRequestException)
+                    Log.Debug($"Can't connect to myIp service {ex}");
+                else throw;
+            }
+            return String.Empty;            
         }
 
     }

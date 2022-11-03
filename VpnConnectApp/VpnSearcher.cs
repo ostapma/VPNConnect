@@ -69,21 +69,7 @@ namespace VPNConnect
                         {
                             Thread.Sleep(SecToMs(1));
                             connectionTimeSec++;
-                            try
-                            {
-                                connectedExternalIp = externalIpServiceProvider.GetMyIp();
-                            }
-                            catch (HttpRequestException ex)
-                            {
-                                Log.Debug($"Can't connect to myIp service {ex}");
-                            }
-                            catch (AggregateException ex )
-                            {
-                                if (ex.InnerException is HttpRequestException)
-                                    Log.Debug($"Can't connect to myIp service {ex}");
-                                else throw;
-                            }
-                            
+                            connectedExternalIp = externalIpServiceProvider.GetMyIp();
                         }
                         
                         if (connectedExternalIp == disconnectedExternalIp)
