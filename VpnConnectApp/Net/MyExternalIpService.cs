@@ -7,8 +7,16 @@ using static Dapper.SqlMapper;
 
 namespace VPNConnect.Net
 {
+    class IpServiceProviderResult
+    {
+        public string IpAddress { get; set; }
+        public bool IsSuccess { get; set; }
+    }
+
     internal class ExternalIpServiceProvider
     {
+
+
         private readonly string externalIpServiceLink;
 
         public ExternalIpServiceProvider(string externalIpServiceLink)
@@ -17,12 +25,14 @@ namespace VPNConnect.Net
         }
 
 
-        public string GetMyIp()
+        public IpServiceProviderResult GetMyIp()
         {
+            var result = new IpServiceProviderResult();
             try
             {
                 var externalIpStringTask = new HttpClient().GetStringAsync(externalIpServiceLink);
-                return externalIpStringTask.Result.Replace("\\r\\n", "").Replace("\\n", "").Trim();
+                result.IpAddress = externalIpStringTask.Result.Replace("\\r\\n", "").Replace("\\n", "").Trim();
+                result.IsSuccess = true;
             }
             catch (HttpRequestException ex)
             {
@@ -34,7 +44,7 @@ namespace VPNConnect.Net
                     Log.Debug($"Can't connect to myIp service {ex}");
                 else throw;
             }
-            return String.Empty;            
+            return result;
         }
 
     }

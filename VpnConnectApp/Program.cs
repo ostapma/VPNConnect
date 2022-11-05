@@ -44,7 +44,7 @@ VpnSearcher searcher = new(vpnUiHandler, settings);
 
 try
 {
-    searcher.StartHotkey();
+    searcher.Start();
 }
 
 catch (Exception e)
@@ -54,7 +54,7 @@ catch (Exception e)
 
 Application.ApplicationExit += (ev, t) =>
 {
-    searcher.StopHotkey();
+    searcher.Stop();
 };
 
 Application.Run();

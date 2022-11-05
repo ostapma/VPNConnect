@@ -18,7 +18,8 @@ namespace VPNConnect
         KeyboardHookManager keyboardHookManager = new();
         private readonly IVpnUiHandler vpnUiHandler;
         private readonly VpnSearchSettings settings;
-        private string disconnectedExternalIp = "";
+        private string currentIp;
+        ExternalIpServiceProvider externalIpServiceProvider;
 
 
         public VpnSearcher(IVpnUiHandler vpnUiHandler , VpnSearchSettings settings
@@ -26,33 +27,42 @@ namespace VPNConnect
         {
             this.vpnUiHandler = vpnUiHandler;
             this.settings = settings;
+            externalIpServiceProvider = new ExternalIpServiceProvider(settings.ExternalIpServiceLink);
         }
 
-        public void StartHotkey()
+        public void Start()
         {
-            ExternalIpServiceProvider externalIpServiceProvider = new ExternalIpServiceProvider(settings.ExternalIpServiceLink );
-            disconnectedExternalIp = externalIpServiceProvider.GetMyIp();
-            Log.Information($"My IP is {disconnectedExternalIp}");
+            var disconnectedExternalIp = externalIpServiceProvider.GetMyIp();
+            if (!disconnectedExternalIp.IsSuccess)
+            {
+                Log.Error($"Can't get current connection info, check your Internet connection");
+                return;
+            }
+            Log.Information($"My IP is {disconnectedExternalIp.IpAddress}");
             var geoIpRepository = new GeoIp.Repo.GeoIpRepository(settings.GeoIpDbSettings.ConnectionString);
             keyboardHookManager.Start();
 
             keyboardHookManager.RegisterHotkey(GetVcode(settings.ConsoleSettings.StopHotKey), () =>
             {
-                Log.Information($"{settings.ConsoleSettings.StopHotKey} pressed");
-                Log.Information("VPN searching is stopping");
-                isStarted = false;
+                if (isStarted)
+                {
+                    Log.Information($"{settings.ConsoleSettings.StopHotKey} pressed");
+                    Log.Information("VPN searching is stopping");
+                    isStarted = false;
+                }
+                
             });
 
             keyboardHookManager.RegisterHotkey(GetVcode(settings.ConsoleSettings.StartHotKey), () =>
             {
                 if (isStarted) return;
+                isStarted = true;
                 Log.Information($"{settings.ConsoleSettings.StartHotKey} pressed");
                 Log.Information("VPN searching is started");
 
                 NetQualityAnalyzer netQualityAnalyzer = new(settings.NetAnanlyzeSettings.PingTarget,
                     settings.NetAnanlyzeSettings.PingHops, settings.NetAnanlyzeSettings.BlacklistCountries);
 
-                isStarted = true;
                 while (isStarted)
                 {
                     try {
@@ -63,28 +73,22 @@ namespace VPNConnect
 
                         Log.Information($"Waiting for VPN connection {settings.VpnUiHandlingSettings.ConnectTimeoutSec} sec");
 
-                        int connectionTimeSec = 0;
-                        string connectedExternalIp = disconnectedExternalIp;
-                        while(connectionTimeSec< settings.VpnUiHandlingSettings.ConnectTimeoutSec && connectedExternalIp== disconnectedExternalIp)
-                        {
-                            Thread.Sleep(SecToMs(1));
-                            connectionTimeSec++;
-                            connectedExternalIp = externalIpServiceProvider.GetMyIp();
-                        }
-                        
-                        if (connectedExternalIp == disconnectedExternalIp)
+                        bool isVpnStateChanged = IsVpnStateChanged(disconnectedExternalIp.IpAddress);
+
+
+                        if (!IsVpnStateChanged(disconnectedExternalIp.IpAddress))
                         {
                             Log.Information($"Can't connect, VPN client seems doesn't work");
                             isStarted = false;
                         }
                         else
                         {
-                            Log.Information($"Connected. My IP: {connectedExternalIp}");
+                            Log.Information($"Connected. My IP: {currentIp}");
 
-                            var geoiInfo = geoIpRepository.GetByIpAddress(connectedExternalIp);
+                            var geoiInfo = geoIpRepository.GetByIpAddress(currentIp);
 
                             if (geoiInfo != null) {
-                                Log.Information($"The VPN geoip info: countryID: {geoiInfo.CountryID} city: {geoiInfo.CityName}");
+                                Log.Information($"The VPN geoip info: country code: {geoiInfo.CountryID}; city: {geoiInfo.CityName}");
                             }
                             else
                             {
@@ -142,13 +146,37 @@ namespace VPNConnect
             });
         }
 
+
+        private bool IsVpnStateChanged(string initialIp)
+        {
+            int connectionTimeSec = 0;
+            while (connectionTimeSec < settings.VpnUiHandlingSettings.ConnectTimeoutSec)
+            {
+                Thread.Sleep(SecToMs(1));
+                connectionTimeSec++;
+                var ip = externalIpServiceProvider.GetMyIp();
+                if (ip.IsSuccess && ip.IpAddress!=initialIp)
+                {
+                    currentIp = ip.IpAddress;
+                    return true;
+                }
+            }
+            return false;
+
+        }
+
         private void Disconect()
         {
             Log.Information("Disconnecting");
             Log.Information("Simulate mouse left click on VPN client DISCONNECT button");
             vpnUiHandler.PressDisconnect();
             Log.Information($"Waiting for disconnect {settings.VpnUiHandlingSettings.ConnectTimeoutSec} sec");
-            Thread.Sleep(SecToMs(settings.VpnUiHandlingSettings.ConnectTimeoutSec));
+
+            if (!IsVpnStateChanged(currentIp))
+            {
+                Log.Error("Can't disconnect, there is something wrong with your VPN client");
+                isStarted = false;
+            }
         }
 
         private int GetVcode(string code)
@@ -161,7 +189,7 @@ namespace VPNConnect
             return sec * 1000;
         }
 
-        public void StopHotkey()
+        public void Stop()
         {
             isStarted = false;
             keyboardHookManager.UnregisterHotkey(GetVcode(settings.ConsoleSettings.StopHotKey));
