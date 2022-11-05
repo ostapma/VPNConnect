@@ -21,11 +21,12 @@ VpnServiceType? vpnService=null;
 while (vpnService==null)
 {
     Console.WriteLine("Type w for windscribe or h for hideme");
-    string vpnServiceInput = Console.ReadLine();
-    vpnService =  vpnServiceInput.ToLower() switch
+    var vpnServiceInput = Console.ReadKey();
+    Console.WriteLine();
+    vpnService = vpnServiceInput.KeyChar switch
     {
-        "w" =>  VpnServiceType.Windscribe,
-        "h" =>  VpnServiceType.Hideme,
+        'w' =>  VpnServiceType.Windscribe,
+        'h' =>  VpnServiceType.Hideme,
         _ => null,
     };
     if (vpnService==null) Console.WriteLine($"{vpnServiceInput} is not a valid value");

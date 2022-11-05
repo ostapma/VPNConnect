@@ -8,10 +8,9 @@ using VPNConnect.Net;
 
 namespace VPNConnectTests.Unit
 {
-    [TestClass]
     public class NetUtilsTest
     {
-        [TestMethod]
+        [Test]
         public void IpToHexTest()
         {
             string testValidIp = "192.168.1.154";

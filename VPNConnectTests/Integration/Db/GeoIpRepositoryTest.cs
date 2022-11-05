@@ -1,5 +1,4 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -7,15 +6,14 @@ using System.Threading.Tasks;
 using VPNConnect.Net;
 using GeoIp.Repo;
 
-namespace VPNConnectTests.Integration
+namespace VpnConnectTests.Integration.Db
 {
-    [TestClass]
     public class GeoIpRepositoryTest
     {
         string conn = "Data Source=C:\\Work\\Winsconnect\\VpnConnect\\geoip.db";
 
 
-        [TestMethod]
+        [Test]
         public void GetCountTest()
         {
             GeoIpRepository repo = new GeoIpRepository(conn);
@@ -23,7 +21,7 @@ namespace VPNConnectTests.Integration
             Assert.AreNotEqual(0, actual);
         }
 
-        [TestMethod]
+        [Test]
         public void GetByIpAddressTest()
         {
             GeoIpRepository repo = new GeoIpRepository(conn);
