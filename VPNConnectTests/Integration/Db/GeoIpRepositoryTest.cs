@@ -10,13 +10,24 @@ namespace VpnConnectTests.Integration.Db
 {
     public class GeoIpRepositoryTest
     {
-        string conn = "Data Source=C:\\Work\\Winsconnect\\VpnConnect\\geoip.db";
+        private GeoIpRepository repo;
+
+        [SetUp]
+        public void Init()
+        {
+            repo = new GeoIpRepository(SqliteTestDbScope.GetTestConnectionString());
+        }
+
+        [TearDown]
+        public void TearDown()
+        {
+            repo.Dispose();
+        }
 
 
         [Test]
         public void GetCountTest()
         {
-            GeoIpRepository repo = new GeoIpRepository(conn);
             var actual = repo.GetCount();
             Assert.AreNotEqual(0, actual);
         }
@@ -24,7 +35,6 @@ namespace VpnConnectTests.Integration.Db
         [Test]
         public void GetByIpAddressTest()
         {
-            GeoIpRepository repo = new GeoIpRepository(conn);
             var actual = repo.GetByIpAddress("8.8.8.8");
             Assert.IsNotNull(actual);
             Assert.AreEqual("US", actual.CountryID);

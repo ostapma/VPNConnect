@@ -10,7 +10,7 @@ using GeoIp.Entities;
 
 namespace GeoIp.Repo
 {
-    public class GeoIpRepository
+    public class GeoIpRepository:IDisposable
     {
         SqliteConnection connection;
 
@@ -50,6 +50,11 @@ namespace GeoIp.Repo
             connection.Execute(@"Update CityIP set IPRangeStartHex = @startIpHex, 
                 IPRangeEndHex = @endIpHex where CityIPID = @cityIpId", new { startIpHex= NetUtils.IpToHex(startIp), 
                 endIpHex= NetUtils.IpToHex(endIp), cityIpId });
+        }
+
+        public void Dispose()
+        {
+            connection?.Dispose();
         }
 
         //public GeoIpCity FindCityByIp(string ipAddress)
