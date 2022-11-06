@@ -39,7 +39,7 @@ namespace VPNConnect
                 return;
             }
             Log.Information($"My IP is {disconnectedExternalIp.IpAddress}");
-            var geoIpRepository = new GeoIp.Repo.GeoIpRepository(settings.GeoIpDbSettings.ConnectionString);
+            var geoIpRepository = new GeoIp.Repo.GeoIpCityRepository(settings.GeoIpDbSettings.ConnectionString);
             keyboardHookManager.Start();
 
             keyboardHookManager.RegisterHotkey(GetVcode(settings.ConsoleSettings.StopHotKey), () =>

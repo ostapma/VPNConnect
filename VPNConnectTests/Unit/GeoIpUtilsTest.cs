@@ -8,17 +8,17 @@ using VPNConnect.Net;
 
 namespace VPNConnectTests.Unit
 {
-    public class NetUtilsTest
+    public class GeoIpUtilsTest
     {
         [Test]
         public void IpToHexTest()
         {
             string testValidIp = "192.168.1.154";
-            var actual = NetUtils.IpToHex(testValidIp);
+            var actual = GeoIpUtils.IpToHex(testValidIp);
             var expected = 0xc0a8019a;
             Assert.AreEqual(expected, actual, $"expected {expected}, actual {actual}");
             string invalidIp = "123.2.";
-            actual = NetUtils.IpToHex(invalidIp);
+            actual = GeoIpUtils.IpToHex(invalidIp);
             Assert.AreEqual(0, actual, $"expected 0, actual {actual}");
         }
 

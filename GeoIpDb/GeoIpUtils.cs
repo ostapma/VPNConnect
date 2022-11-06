@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace GeoIp
 {
 
-    public static class NetUtils
+    public static class GeoIpUtils
     {
         public static long IpToHex(string ipString)
         {

@@ -7,7 +7,6 @@ using System.Text;
 using System.Threading.Tasks;
 using Serilog;
 using VPNConnect.Net;
-using GeoIp.Entities;
 using GeoIp.Repo;
 
 namespace GeoIpUtils.IpToHex
@@ -16,12 +15,17 @@ namespace GeoIpUtils.IpToHex
     //            connection.Execute("PRAGMA synchronous=OFF");
     internal class IpToHexConvertor
     {
-        string conn = "Data Source=C:\\Work\\Winsconnect\\Winsconnect\\geoip.db";
+        public IpToHexConvertor(string connectionString)
+        {
+            this.connectionString = connectionString;
+        }
+
         int pageSize = 1000;
+        private readonly string connectionString;
 
         public void ConvertForCity()
         {
-            GeoIpRepository geoIpRepository = new GeoIpRepository(conn);
+            GeoIpCityRepository geoIpRepository = new GeoIpCityRepository(connectionString);
 
             var page = geoIpRepository.GetPage(144000, pageSize);
 
@@ -33,7 +37,7 @@ namespace GeoIpUtils.IpToHex
 
                     foreach (var cityIp in page)
                     {
-                        geoIpRepository.UpdateHexIp(cityIp.CityIpId, cityIp.IpRangeStart, cityIp.IpRangeEnd);
+                        geoIpRepository.UpdateHexIp(cityIp.CityIpId, cityIp.IpRange);
                     }
                     page = geoIpRepository.GetPage(page.Last().CityIpId, pageSize);
                 }

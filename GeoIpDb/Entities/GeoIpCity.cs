@@ -4,16 +4,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GeoIp.Entities
+namespace GeoIpDb.Entities
 {
     public class GeoIpCity
     {
         public long CityIpId { get; set; }  
 
-        public string IpRangeStart { get; set; }
-
-        public string IpRangeEnd { get; set; }
-
+        public IpRange IpRange { get; set; }
+        
         public string RegionName { get; set; }
         public string CityName { get; set; }    
         public string CountryID { get; set; }
