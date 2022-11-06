@@ -1,4 +1,5 @@
-﻿using Microsoft.Data.Sqlite;
+﻿using Dapper;
+using Microsoft.Data.Sqlite;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,6 +11,11 @@ namespace GeoIpDb.Repo
     public abstract class RepositoryBase:IDisposable
     {
         protected SqliteConnection connection;
+
+        //public void SetSynchronousModeOff()
+        //{
+        //    connection.Execute("PRAGMA synchronous=OFF");
+        //}
         public RepositoryBase(string connectionString)
         {
 

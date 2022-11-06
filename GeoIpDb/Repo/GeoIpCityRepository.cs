@@ -8,8 +8,9 @@ using System.Text;
 using System.Threading.Tasks;
 using GeoIpDb.Repo;
 using GeoIpDb.Entities;
+using GeoIp;
 
-namespace GeoIp.Repo
+namespace GeoIpDb.Repo
 {
     public class GeoIpCityRepository:RepositoryBase
     {

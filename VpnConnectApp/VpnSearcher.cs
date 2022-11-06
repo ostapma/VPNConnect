@@ -39,7 +39,9 @@ namespace VPNConnect
                 return;
             }
             Log.Information($"My IP is {disconnectedExternalIp.IpAddress}");
-            var geoIpRepository = new GeoIp.Repo.GeoIpCityRepository(settings.GeoIpDbSettings.ConnectionString);
+            var geoCityIpRepository = new GeoIpDb.Repo.GeoIpCityRepository(settings.GeoIpDbSettings.ConnectionString);
+            List<string> blacklistCountries = new GeoIpDb.Repo.GeoIpCountryRepository(settings.GeoIpDbSettings.ConnectionString)
+                .GetList().Where(c => c.IsBlacklisted).Select(c=>c.CountryId).ToList();
             keyboardHookManager.Start();
 
             keyboardHookManager.RegisterHotkey(GetVcode(settings.ConsoleSettings.StopHotKey), () =>
@@ -61,7 +63,7 @@ namespace VPNConnect
                 Log.Information("VPN searching is started");
 
                 NetQualityAnalyzer netQualityAnalyzer = new(settings.NetAnanlyzeSettings.PingTarget,
-                    settings.NetAnanlyzeSettings.PingHops, settings.NetAnanlyzeSettings.BlacklistCountries);
+                    settings.NetAnanlyzeSettings.PingHops, blacklistCountries) ;
 
                 while (isStarted)
                 {
@@ -85,7 +87,7 @@ namespace VPNConnect
                         {
                             Log.Information($"Connected. My IP: {currentIp}");
 
-                            var geoiInfo = geoIpRepository.GetByIpAddress(currentIp);
+                            var geoiInfo = geoCityIpRepository.GetByIpAddress(currentIp);
 
                             if (geoiInfo != null) {
                                 Log.Information($"The VPN geoip info: country code: {geoiInfo.CountryID}; city: {geoiInfo.CityName}");

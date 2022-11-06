@@ -2,12 +2,23 @@
 using GeoIpUtils.IpToHex;
 using Serilog;
 
-string conn = "Data Source=C:\\Work\\Winsconnect\\Winsconnect\\geoip.db";
+string dbFile = "C:\\Work\\Winsconnect\\VpnConnect\\geoip.db";
+
+string conn = $"Data Source={dbFile};";
 
 Log.Logger = new LoggerConfiguration().WriteTo.Console().CreateLogger();
 
 IpToHexConvertor convertor = new(conn);
 
-Console.WriteLine("Populating IP address ranges converted to HEX for speeding up searches");
+Console.WriteLine("Warning! To speed up data updates db flushing is disabled that may corrupt database if processing has been interrupted");
+Console.WriteLine($"Please backup database file {dbFile} before the start");
+Console.WriteLine("Press any key if you are ready");
+Console.ReadKey();
 
-convertor.ConvertForCity();
+Console.WriteLine("Populating cities IP address ranges converted to HEX for speeding up searches");
+
+//convertor.ConvertForCity();
+
+Console.WriteLine("Populating ASN IP address ranges converted to HEX for speeding up searches");
+
+convertor.ConvertForAsn();

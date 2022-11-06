@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Serilog;
 using VPNConnect.Net;
-using GeoIp.Repo;
+using GeoIpDb.Repo;
 
 namespace GeoIpUtils.IpToHex
 {
@@ -25,8 +25,8 @@ namespace GeoIpUtils.IpToHex
 
         public void ConvertForCity()
         {
-            GeoIpCityRepository geoIpRepository = new GeoIpCityRepository(connectionString);
-
+            var geoIpRepository = new GeoIpCityRepository(connectionString);
+            //geoIpRepository.SetSynchronousModeOff();
             var page = geoIpRepository.GetPage(144000, pageSize);
 
             do
@@ -44,6 +44,30 @@ namespace GeoIpUtils.IpToHex
             }
             while (page.Count() >= pageSize);
             }
+        public void ConvertForAsn()
+        {
+            var geoIpRepository = new GeoIpAsnRepository(connectionString);
+            //geoIpRepository.SetSynchronousModeOff();
+
+            var page = geoIpRepository.GetPage(0, pageSize);
+
+            do
+            {
+                if (page.Count() > 0)
+                {
+                    Log.Information($"Processing {pageSize} records starting from {page.First().AsnIpId}");
+
+                    foreach (var asnIp in page)
+                    {
+                        geoIpRepository.UpdateHexIp(asnIp.AsnIpId, asnIp.IpRange);
+                    }
+                    page = geoIpRepository.GetPage(page.Last().AsnIpId, pageSize);
+                }
+            }
+            while (page.Count() >= pageSize);
         }
+    }
+
+
     }
 

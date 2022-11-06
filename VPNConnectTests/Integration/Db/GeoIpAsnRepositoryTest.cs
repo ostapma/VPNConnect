@@ -1,5 +1,4 @@
-﻿using GeoIp.Repo;
-using GeoIpDb.Entities;
+﻿using GeoIpDb.Entities;
 using GeoIpDb.Repo;
 using System;
 using System.Collections.Generic;
@@ -9,35 +8,22 @@ using System.Threading.Tasks;
 
 namespace VpnConnectTests.Integration.Db
 {
-    public class GeoIpAsnRepositoryTest:GeoIpRepositoryTestBase
+    public class GeoIpAsnRepositoryTest:GeoIpRepositoryTestBase<GeoIpAsnRepository>
     {
-        private GeoIpAsnRepository repo;
-
-        [SetUp]
-        public void Init()
-        {
-            repo = new GeoIpAsnRepository(SqliteTestDbScope.GetTestConnectionString());
-        }
-
-        [TearDown]
-        public void TearDown()
-        {
-            repo.Dispose();
-        }
 
         [Test]
         public void GetByIpAddressTest()
         {
-            var actual = repo.GetByIpAddress(googleDnsIp);
+            var actual = repo.GetByIpAddress(TestSettings.GoogleDnsIp);
             CheckAllFieldsFilled(actual);
         }
 
         [Test]
         public void GetPageTest()
         {
-            var testData = repo.GetByIpAddress(googleDnsIp);
-            var actual = repo.GetPage(testData.AsnIpId, 10);
-            Assert.AreEqual(actual.Count(), 10);
+            var testData = repo.GetByIpAddress(TestSettings.GoogleDnsIp);
+            var actual = repo.GetPage(testData.AsnIpId, TestSettings.TestPageSize);
+            Assert.AreEqual(actual.Count(), TestSettings.TestPageSize);
             foreach (var a in actual) CheckAllFieldsFilled(a);
         }
 
@@ -51,7 +37,7 @@ namespace VpnConnectTests.Integration.Db
         [Test]
         public void UpdateHexIpTest()
         {
-            var testData = repo.GetByIpAddress(googleDnsIp);
+            var testData = repo.GetByIpAddress(TestSettings.GoogleDnsIp);
             var testIpRange = new IpRange { IpRangeStart = "255.255.255.0", IpRangeEnd = "255.255.255.255" };
             repo.UpdateHexIp(testData.AsnIpId, testIpRange);
             var updatedData = repo.GetByIpAddress("255.255.255.1");

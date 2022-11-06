@@ -7,7 +7,7 @@
 
         public int TolerableLatencySec { get; set; } = 0;
 
-        public List<string> BlacklistCountries { get; set; } = new List<string>();
+        //public List<string> BlacklistCountries { get; set; } = new List<string>();
         public int PingHops { get; set; } = 0;
     }
 }
