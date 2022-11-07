@@ -61,7 +61,7 @@ namespace VPNConnect.Net
                     }
                     completedTries++;
                 }                
-                if (quality.LostPackets < retries) quality.AvgLatency = totalLatency / (retries - quality.LostPackets);
+                if (quality.LostPackets < completedTries) quality.AvgLatency = totalLatency / (completedTries - quality.LostPackets);
                 quality.IsValid = true;
 
             }

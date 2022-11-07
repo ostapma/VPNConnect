@@ -39,7 +39,9 @@ namespace VPNConnect
                 return;
             }
             Log.Information($"My IP is {disconnectedExternalIp.IpAddress}");
-            var geoCityIpRepository = new GeoIpDb.Repo.GeoIpCityRepository(settings.GeoIpDbSettings.ConnectionString);
+            var geoIpCityRepository = new GeoIpDb.Repo.GeoIpCityRepository(settings.GeoIpDbSettings.ConnectionString);
+            var geoIpAsnRepository = new GeoIpDb.Repo.GeoIpAsnRepository(settings.GeoIpDbSettings.ConnectionString);
+            var knownIpRepository = new GeoIpDb.Repo.KnownIpPoolRepository(settings.GeoIpDbSettings.ConnectionString);
             List<string> blacklistCountries = new GeoIpDb.Repo.GeoIpCountryRepository(settings.GeoIpDbSettings.ConnectionString)
                 .GetList().Where(c => c.IsBlacklisted).Select(c=>c.CountryId).ToList();
             keyboardHookManager.Start();
@@ -49,7 +51,7 @@ namespace VPNConnect
                 if (isStarted)
                 {
                     Log.Information($"{settings.ConsoleSettings.StopHotKey} pressed");
-                    Log.Information("VPN searching is stopping");
+                    Log.Information("Wait for VPN searching to stop");
                     isStarted = false;
                 }
                 
@@ -87,18 +89,27 @@ namespace VPNConnect
                         {
                             Log.Information($"Connected. My IP: {currentIp}");
 
-                            var geoiInfo = geoCityIpRepository.GetByIpAddress(currentIp);
+                            var geoipCityInfo = geoIpCityRepository.GetByIpAddress(currentIp);
+                            var geoipAsnInfo = geoIpAsnRepository.GetByIpAddress(currentIp);
 
-                            if (geoiInfo != null) {
-                                Log.Information($"The VPN geoip info: country code: {geoiInfo.CountryID}; city: {geoiInfo.CityName}");
+                            if (geoipCityInfo != null) {
+                                Log.Information($"The VPN geoip city info: country code: {geoipCityInfo.CountryID}; city: {geoipCityInfo.CityName}");
                             }
                             else
                             {
                                 Log.Information($"The VPN geoip info is not found");
                             }
 
-                            bool isCountryBlacklisted = netQualityAnalyzer.IsCountryBlacklisted(geoiInfo != null ? geoiInfo.CountryID : "");
-                            NetQuality? netQuality = null;
+                            if (geoipAsnInfo != null)
+                            {
+                                Log.Information($"The VPN's ASN Name: {geoipAsnInfo.Asn.Name}");
+                            }
+                            else
+                            {
+                                Log.Information($"The VPN's ASN info is not found");
+                            }
+
+                            bool isCountryBlacklisted = netQualityAnalyzer.IsCountryBlacklisted(geoipCityInfo != null ? geoipCityInfo.CountryID : "");
 
                             if (isCountryBlacklisted)
                             {
@@ -107,33 +118,21 @@ namespace VPNConnect
                             }
                             else
                             {
-                                Log.Information($"Started network quality analyzing with {settings.NetAnanlyzeSettings.PingTarget} as target");
-                                netQuality = netQualityAnalyzer.Analyze(settings.NetAnanlyzeSettings.TolerablePacketLoss);
-                                if (netQuality.IsValid)
+                                var knownIp = knownIpRepository.GetByIpAddress(currentIp);
+                                if (knownIp != null)
                                 {
-                                    Log.Information($"Packets lost: {netQuality.LostPackets}; avg latency: {netQuality.AvgLatency}");
-                                    if (netQuality.LostPackets < settings.NetAnanlyzeSettings.TolerablePacketLoss
-                                        && netQuality.AvgLatency < settings.NetAnanlyzeSettings.TolerableLatencySec)
+                                    if (knownIp.IsBlacklisted)
                                     {
-                                        Log.Information("The VPN is good enough, let's stop here");
-                                        isStarted = false;
-                                    }
-                                    else
-                                    {
-                                        Log.Information("The VPN connection is no good");
+                                        Log.Information($"The VPN IP is in your blacklist");
                                         Disconect();
                                     }
+                                    else NetAnalyze(netQualityAnalyzer);
                                 }
-                                else
-                                {
-                                    Log.Information("Latency analyzing was unsuccesfull");
-                                    Disconect();
-                                }
-                                 
+                                else NetAnalyze(netQualityAnalyzer);
+                                
                             }
 
                         }
-
 
                     }
                     catch (Exception ex)
@@ -167,10 +166,37 @@ namespace VPNConnect
 
         }
 
+        private void NetAnalyze(NetQualityAnalyzer netQualityAnalyzer)
+        {
+            NetQuality? netQuality = null;
+            Log.Information($"Started network quality analyzing with {settings.NetAnanlyzeSettings.PingTarget} as a target");
+            netQuality = netQualityAnalyzer.Analyze(settings.NetAnanlyzeSettings.TolerablePacketLoss);
+            if (netQuality.IsValid)
+            {
+                Log.Information($"Packets lost: {netQuality.LostPackets}; avg latency: {netQuality.AvgLatency}");
+                if (netQuality.LostPackets < settings.NetAnanlyzeSettings.TolerablePacketLoss
+                    && netQuality.AvgLatency < settings.NetAnanlyzeSettings.TolerableLatencySec)
+                {
+                    Log.Information("The VPN is good enough, let's stop here");
+                    isStarted = false;
+                }
+                else
+                {
+                    Log.Information("The VPN connection is no good");
+                    Disconect();
+                }
+            }
+            else
+            {
+                Log.Information("Latency analyzing was unsuccesfull");
+                Disconect();
+            }
+        }
+
         private void Disconect()
         {
             Log.Information("Disconnecting");
-            Log.Information("Simulate mouse left click on VPN client DISCONNECT button");
+            Log.Information("Emulate mouse left click on VPN client DISCONNECT button");
             vpnUiHandler.PressDisconnect();
             Log.Information($"Waiting for disconnect {settings.VpnUiHandlingSettings.ConnectTimeoutSec} sec");
 

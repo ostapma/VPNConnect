@@ -11,5 +11,14 @@ namespace GeoIpDb.Entities
         public string IpRangeStart { get; set; }
 
         public string IpRangeEnd { get; set; }
+
+
+        public override bool Equals(object? obj)
+        {
+            if (obj == null|| !this.GetType().Equals(obj.GetType())) return false;
+            IpRange other = (IpRange)obj;
+
+            return (this.IpRangeStart==other.IpRangeStart&&this.IpRangeEnd==other.IpRangeEnd);
+        }
     }
 }
