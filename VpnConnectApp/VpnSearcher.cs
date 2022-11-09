@@ -9,6 +9,8 @@ using System.Net.NetworkInformation;
 using VPNConnect.UIHandling;
 using VPNConnect.Net;
 using VpnConnect.Configuration;
+using GeoIpDb.Repo;
+using System.Net.Mail;
 
 namespace VPNConnect
 {
@@ -20,14 +22,21 @@ namespace VPNConnect
         private readonly VpnSearchSettings settings;
         private string currentIp;
         ExternalIpServiceProvider externalIpServiceProvider;
+        private GeoIpCityRepository geoIpCityRepository;
+        private GeoIpAsnRepository geoIpAsnRepository;
+        private KnownIpPoolRepository knownIpRepository;
+        private List<string> blacklistCountries;
 
-
-        public VpnSearcher(IVpnUiHandler vpnUiHandler , VpnSearchSettings settings
-            )
+        public VpnSearcher(IVpnUiHandler vpnUiHandler , VpnSearchSettings settings)
         {
             this.vpnUiHandler = vpnUiHandler;
             this.settings = settings;
             externalIpServiceProvider = new ExternalIpServiceProvider(settings.ExternalIpServiceLink);
+            geoIpCityRepository = new GeoIpCityRepository(settings.GeoIpDbSettings.ConnectionString);
+            geoIpAsnRepository = new GeoIpAsnRepository(settings.GeoIpDbSettings.ConnectionString);
+            knownIpRepository = new KnownIpPoolRepository(settings.GeoIpDbSettings.ConnectionString);
+            blacklistCountries = new GeoIpCountryRepository(settings.GeoIpDbSettings.ConnectionString)
+                .GetList().Where(c => c.IsBlacklisted).Select(c => c.CountryId).ToList();
         }
 
         public void Start()
@@ -39,25 +48,28 @@ namespace VPNConnect
                 return;
             }
             Log.Information($"My IP is {disconnectedExternalIp.IpAddress}");
-            var geoIpCityRepository = new GeoIpDb.Repo.GeoIpCityRepository(settings.GeoIpDbSettings.ConnectionString);
-            var geoIpAsnRepository = new GeoIpDb.Repo.GeoIpAsnRepository(settings.GeoIpDbSettings.ConnectionString);
-            var knownIpRepository = new GeoIpDb.Repo.KnownIpPoolRepository(settings.GeoIpDbSettings.ConnectionString);
-            List<string> blacklistCountries = new GeoIpDb.Repo.GeoIpCountryRepository(settings.GeoIpDbSettings.ConnectionString)
-                .GetList().Where(c => c.IsBlacklisted).Select(c=>c.CountryId).ToList();
+
             keyboardHookManager.Start();
 
             keyboardHookManager.RegisterHotkey(GetVcode(settings.ConsoleSettings.StopHotKey), () =>
-            {
-                if (isStarted)
-                {
-                    Log.Information($"{settings.ConsoleSettings.StopHotKey} pressed");
-                    Log.Information("Wait for VPN searching to stop");
-                    isStarted = false;
-                }
-                
-            });
+                StopSearch());
 
-            keyboardHookManager.RegisterHotkey(GetVcode(settings.ConsoleSettings.StartHotKey), () =>
+            keyboardHookManager.RegisterHotkey(GetVcode(settings.ConsoleSettings.StartHotKey), () => 
+                StartSearch(disconnectedExternalIp.IpAddress));
+        }
+
+        private void StopSearch()
+        {
+            if (isStarted)
+            {
+                Log.Information($"{settings.ConsoleSettings.StopHotKey} pressed");
+                Log.Information("Wait for VPN searching to stop");
+                isStarted = false;
+            }
+        }
+
+        private void StartSearch(string initialIp)
+        {
             {
                 if (isStarted) return;
                 isStarted = true;
@@ -65,11 +77,12 @@ namespace VPNConnect
                 Log.Information("VPN searching is started");
 
                 NetQualityAnalyzer netQualityAnalyzer = new(settings.NetAnanlyzeSettings.PingTarget,
-                    settings.NetAnanlyzeSettings.PingHops, blacklistCountries) ;
+                    settings.NetAnanlyzeSettings.PingHops, blacklistCountries);
 
                 while (isStarted)
                 {
-                    try {
+                    try
+                    {
 
                         Log.Information("Emulate mouse left click on VPN client CONNECT button");
 
@@ -77,22 +90,24 @@ namespace VPNConnect
 
                         Log.Information($"Waiting for VPN connection {settings.VpnUiHandlingSettings.ConnectTimeoutSec} sec");
 
-                        bool isVpnStateChanged = IsVpnStateChanged(disconnectedExternalIp.IpAddress);
+                        var connectionWaitingResult = externalIpServiceProvider.WaitForMyIpChanging(initialIp, settings.VpnUiHandlingSettings.ConnectTimeoutSec);
 
-
-                        if (!IsVpnStateChanged(disconnectedExternalIp.IpAddress))
+                        if (connectionWaitingResult.IsTimeout)
                         {
-                            Log.Information($"Can't connect, VPN client seems doesn't work");
-                            isStarted = false;
+                            Log.Information($"Connection timeout, let's retry");
+
+                            Disconect();
                         }
-                        else
+                        else if (connectionWaitingResult.IsSuccess)
                         {
+                            currentIp = connectionWaitingResult.IpAddress;
                             Log.Information($"Connected. My IP: {currentIp}");
 
                             var geoipCityInfo = geoIpCityRepository.GetByIpAddress(currentIp);
                             var geoipAsnInfo = geoIpAsnRepository.GetByIpAddress(currentIp);
 
-                            if (geoipCityInfo != null) {
+                            if (geoipCityInfo != null)
+                            {
                                 Log.Information($"The VPN geoip city info: country code: {geoipCityInfo.CountryID}; city: {geoipCityInfo.CityName}");
                             }
                             else
@@ -129,9 +144,14 @@ namespace VPNConnect
                                     else NetAnalyze(netQualityAnalyzer);
                                 }
                                 else NetAnalyze(netQualityAnalyzer);
-                                
+
                             }
 
+                        }
+                        else
+                        {
+                            Log.Error("Can't connect, there is something wrong with your VPN client");
+                            isStarted = false;
                         }
 
                     }
@@ -144,33 +164,13 @@ namespace VPNConnect
 
                 Log.Information("VPN searching has stopped");
 
-            });
-        }
-
-
-        private bool IsVpnStateChanged(string initialIp)
-        {
-            int connectionTimeSec = 0;
-            while (connectionTimeSec < settings.VpnUiHandlingSettings.ConnectTimeoutSec)
-            {
-                Thread.Sleep(SecToMs(1));
-                connectionTimeSec++;
-                var ip = externalIpServiceProvider.GetMyIp();
-                if (ip.IsSuccess && ip.IpAddress!=initialIp)
-                {
-                    currentIp = ip.IpAddress;
-                    return true;
-                }
             }
-            return false;
-
         }
 
         private void NetAnalyze(NetQualityAnalyzer netQualityAnalyzer)
         {
-            NetQuality? netQuality = null;
             Log.Information($"Started network quality analyzing with {settings.NetAnanlyzeSettings.PingTarget} as a target");
-            netQuality = netQualityAnalyzer.Analyze(settings.NetAnanlyzeSettings.TolerablePacketLoss);
+            var netQuality = netQualityAnalyzer.Analyze(settings.NetAnanlyzeSettings.TolerablePacketLoss);
             if (netQuality.IsValid)
             {
                 Log.Information($"Packets lost: {netQuality.LostPackets}; avg latency: {netQuality.AvgLatency}");
@@ -200,7 +200,9 @@ namespace VPNConnect
             vpnUiHandler.PressDisconnect();
             Log.Information($"Waiting for disconnect {settings.VpnUiHandlingSettings.ConnectTimeoutSec} sec");
 
-            if (!IsVpnStateChanged(currentIp))
+            var disconnectWaitingResult = externalIpServiceProvider.WaitForMyIpChanging(currentIp, settings.VpnUiHandlingSettings.ConnectTimeoutSec);
+
+            if (!disconnectWaitingResult.IsSuccess||disconnectWaitingResult.IsTimeout)
             {
                 Log.Error("Can't disconnect, there is something wrong with your VPN client");
                 isStarted = false;
@@ -214,7 +216,7 @@ namespace VPNConnect
 
         private int SecToMs(int sec)
         {
-            return sec * 1000;
+            return sec*1000;
         }
 
         public void Stop()
