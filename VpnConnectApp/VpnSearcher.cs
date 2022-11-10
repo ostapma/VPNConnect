@@ -207,6 +207,13 @@ namespace VPNConnect
                 Log.Error("Can't disconnect, there is something wrong with your VPN client");
                 isStarted = false;
             }
+            else
+            {
+                Log.Information("Disconnected");
+                Log.Information($"Waiting {settings.VpnUiHandlingSettings.DelayBetweenConnectionAttemptsSec} sec before the next attempt");
+                Thread.Sleep(TimeSpan.FromSeconds(settings.VpnUiHandlingSettings.DelayBetweenConnectionAttemptsSec));
+            }
+
         }
 
         private int GetVcode(string code)
@@ -214,10 +221,6 @@ namespace VPNConnect
             return (int)Enum.Parse(typeof(Keys), code);
         }
 
-        private int SecToMs(int sec)
-        {
-            return sec*1000;
-        }
 
         public void Stop()
         {

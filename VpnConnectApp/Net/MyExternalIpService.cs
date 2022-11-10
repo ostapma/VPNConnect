@@ -17,8 +17,6 @@ namespace VPNConnect.Net
 
     internal class ExternalIpServiceProvider
     {
-        private const int defaultTimeoutSec = 100;
-
         private readonly string externalIpServiceLink;
 
         public ExternalIpServiceProvider(string externalIpServiceLink)
@@ -27,7 +25,7 @@ namespace VPNConnect.Net
         }
 
 
-        public IpServiceProviderResult WaitForMyIpChanging(string initialIp, int timeoutSec = defaultTimeoutSec)
+        public IpServiceProviderResult WaitForMyIpChanging(string initialIp, int timeoutSec)
         {
             bool checkIpTaskStop = false;
             var ip = new IpServiceProviderResult { };

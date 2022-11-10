@@ -14,16 +14,18 @@ namespace VPNConnect.UIHandling
         public void PressConnect()
         {
             clicker.LeftClick();
-            Thread.Sleep(1000);
+            Thread.Sleep(TimeSpan.FromSeconds(1));
             var currentPosition = clicker.GetPosition();
             clicker.SetPosition(currentPosition.x+ adPopupAjustment.x, currentPosition.y+ adPopupAjustment.y);
             clicker.LeftClick();
-            Thread.Sleep(1000);
+            Thread.Sleep(TimeSpan.FromSeconds(1));
             clicker.SetPosition(currentPosition.x, currentPosition.y);
         }
 
         public void PressDisconnect()
         {
+            int waitHidemeUiLagSec = 5;
+            Thread.Sleep(TimeSpan.FromSeconds(waitHidemeUiLagSec));
             clicker.LeftClick();
         }
     }
