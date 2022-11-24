@@ -44,7 +44,8 @@ namespace VPNConnect.Configuration
                 VpnUiHandlingSettings = config.GetSection("vpnUiHandlingSettings").Get<VpnUiHandlingSettings>(),
                 NetAnanlyzeSettings = config.GetSection("netAnanlyzeSettings").Get<NetAnanlyzeSettings>(),
                 GeoIpDbSettings = config.GetSection("geoIpDbSettings").Get<GeoIpDbSettings>(),
-                ExternalIpServiceLink = config.GetSection("ExternalIpServiceLink").Get<string>()
+                ExternalIpServiceLink = config.GetSection("ExternalIpServiceLink").Get<string>(),
+                TargetApplicationSettings = config.GetSection("targetApplicationSettings").Get<TargetApplicationSettings>()
             };
         }
 

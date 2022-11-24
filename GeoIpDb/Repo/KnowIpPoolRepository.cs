@@ -15,7 +15,7 @@ namespace GeoIpDb.Repo
     public class KnownIpPoolRepository : RepositoryBase
     {
 
-        string knownIpPoolFields = "KnownIPPoolID, Comments, DateAdded, IsBlacklisted, IsGood, IPRangeStart, IPRangeEnd";
+        string knownIpPoolFields = "KnownIPPoolID, Comments, DateAdded, IsBlacklisted, IsGood, ApplicationID, IPRangeStart, IPRangeEnd";
 
         public KnownIpPoolRepository(string connectionString) : base(connectionString)
         {
@@ -51,8 +51,8 @@ namespace GeoIpDb.Repo
 
         public void Add(KnownIpPool knownIpPool)
         {
-            connection.Execute(@"INSERT INTO KnownIPPool ( IsGood, IsBlacklisted, Comments, IPRangeStart, IPRangeEnd, IPRangeStartHex, IPRangeEndHex) 
-                VALUES (@isGood, @isBlacklisted, @comments, @ipRangeStart, @ipRangeEnd, @startIpHex, @endIpHex)",
+            connection.Execute(@"INSERT INTO KnownIPPool ( IsGood, IsBlacklisted, Comments, IPRangeStart, IPRangeEnd, IPRangeStartHex, IPRangeEndHex, ApplicationID) 
+                VALUES (@isGood, @isBlacklisted, @comments, @ipRangeStart, @ipRangeEnd, @startIpHex, @endIpHex, @appId)",
                 new
                 {
                     isGood = knownIpPool.IsGood,
@@ -61,7 +61,8 @@ namespace GeoIpDb.Repo
                     ipRangeStart = knownIpPool.IpRange.IpRangeStart,
                     ipRangeEnd = knownIpPool.IpRange.IpRangeEnd,
                     startIpHex = GeoIpUtils.IpToHex(knownIpPool.IpRange.IpRangeStart),
-                    endIpHex = GeoIpUtils.IpToHex(knownIpPool.IpRange.IpRangeEnd)
+                    endIpHex = GeoIpUtils.IpToHex(knownIpPool.IpRange.IpRangeEnd),
+                    appId = knownIpPool.ApplicationId
                 });
 
         }

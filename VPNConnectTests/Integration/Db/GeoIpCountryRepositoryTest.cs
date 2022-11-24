@@ -1,4 +1,5 @@
-﻿using GeoIpDb.Repo;
+﻿using GeoIpDb.Entities;
+using GeoIpDb.Repo;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,9 +14,23 @@ namespace VpnConnectTests.Integration.Db
         public void GetListTest()
         {
             var actual = repo.GetList();
-            Assert.IsNotNull(actual);
-            Assert.AreNotEqual(actual.Count(),0);
-            var firstItem = actual.First();
+            BasicDataTest(actual);
+        }
+
+        [Test]
+        public void GetBlacklistedTest()
+        {
+            int applicationId = 1;
+            var actual = repo.GetBlacklistedList(applicationId);
+            BasicDataTest(actual);
+
+        }
+
+        private void BasicDataTest(List<GeoIpCountry> countries)
+        {
+            Assert.IsNotNull(countries);
+            Assert.AreNotEqual(countries.Count(), 0);
+            var firstItem = countries.First();
             Assert.IsNotNull(firstItem.Name);
             Assert.IsNotNull(firstItem.CountryId);
             Assert.IsNotEmpty(firstItem.Name);

@@ -11,6 +11,7 @@ using VPNConnect.Net;
 using VpnConnect.Configuration;
 using GeoIpDb.Repo;
 using System.Net.Mail;
+using GeoIpDb.Entities;
 
 namespace VPNConnect
 {
@@ -25,7 +26,7 @@ namespace VPNConnect
         private GeoIpCityRepository geoIpCityRepository;
         private GeoIpAsnRepository geoIpAsnRepository;
         private KnownIpPoolRepository knownIpRepository;
-        private List<string> blacklistCountries;
+        private List<GeoIpCountry> blacklistCountries;
 
         public VpnSearcher(IVpnUiHandler vpnUiHandler , VpnSearchSettings settings)
         {
@@ -36,7 +37,7 @@ namespace VPNConnect
             geoIpAsnRepository = new GeoIpAsnRepository(settings.GeoIpDbSettings.ConnectionString);
             knownIpRepository = new KnownIpPoolRepository(settings.GeoIpDbSettings.ConnectionString);
             blacklistCountries = new GeoIpCountryRepository(settings.GeoIpDbSettings.ConnectionString)
-                .GetList().Where(c => c.IsBlacklisted).Select(c => c.CountryId).ToList();
+                .GetBlacklistedList(settings.TargetApplicationSettings.ApplicationId);
         }
 
         public void Start()
@@ -77,7 +78,7 @@ namespace VPNConnect
                 Log.Information("VPN searching is started");
 
                 NetQualityAnalyzer netQualityAnalyzer = new(settings.NetAnanlyzeSettings.PingTarget,
-                    settings.NetAnanlyzeSettings.PingHops, blacklistCountries);
+                    settings.NetAnanlyzeSettings.PingHops, blacklistCountries.Select(c=>c.CountryId).ToList());
 
                 while (isStarted)
                 {
@@ -134,7 +135,7 @@ namespace VPNConnect
                             else
                             {
                                 var knownIp = knownIpRepository.GetByIpAddress(currentIp);
-                                if (knownIp != null)
+                                if (knownIp != null && (knownIp.ApplicationId==null || knownIp.ApplicationId==settings.TargetApplicationSettings.ApplicationId))
                                 {
                                     if (knownIp.IsBlacklisted)
                                     {

@@ -15,9 +15,16 @@ namespace GeoIpDb.Repo
         {
         }
 
-        public IEnumerable<GeoIpCountry> GetList()
+        public List<GeoIpCountry> GetList()
         {
-            return connection.Query<GeoIpCountry>(@"SELECT CountryID, Name, IsBlacklisted FROM Country");
+            return connection.Query<GeoIpCountry>(@"SELECT CountryID, Name  FROM Country").ToList();
+        }
+
+        public List<GeoIpCountry> GetBlacklistedList(int applicationId)
+        {
+            return connection.Query<GeoIpCountry>(@"SELECT c.CountryID, c.Name  FROM Country c join CountryBlacklist l on 
+                c.CountryID = l.CountryID where l.ApplicationID = applicationID",
+                param: new { applicationId }).ToList();
         }
     }
 }

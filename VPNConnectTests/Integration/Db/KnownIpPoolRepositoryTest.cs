@@ -21,6 +21,7 @@ namespace VpnConnectTests.Integration.Db
                 IpRange = testIpRange,
                 IsBlacklisted = true,
                 IsGood = true,
+                ApplicationId = 1
             };
 
             repo.Add(testIpPool);
@@ -28,10 +29,11 @@ namespace VpnConnectTests.Integration.Db
             var actual = repo.GetByIpAddress("255.255.255.1");
 
             Assert.NotNull(actual);
-            Assert.AreEqual(actual.IpRange, testIpPool.IpRange);
-            Assert.AreEqual(actual.IsGood, testIpPool.IsGood);
-            Assert.AreEqual(actual.Comments, testIpPool.Comments);
-            Assert.AreEqual(actual.IsBlacklisted, testIpPool.IsBlacklisted);
+            Assert.AreEqual(testIpPool.IpRange, actual.IpRange);
+            Assert.AreEqual(testIpPool.IsGood, actual.IsGood);
+            Assert.AreEqual(testIpPool.Comments, actual.Comments);
+            Assert.AreEqual(testIpPool.IsBlacklisted, actual.IsBlacklisted);
+            Assert.AreEqual(testIpPool.ApplicationId, actual.ApplicationId );
             Assert.IsNotNull(actual.DateAdded);
 
         }

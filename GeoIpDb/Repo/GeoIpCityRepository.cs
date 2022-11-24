@@ -48,7 +48,7 @@ namespace GeoIpDb.Repo
                     splitOn: "IPRangeStart").FirstOrDefault();
         }
 
-        public IEnumerable<GeoIpCity> GetPage(long startId, long count)
+        public List<GeoIpCity> GetPage(long startId, long count)
         {
             return connection.Query<GeoIpCity, IpRange, GeoIpCity>(@$"SELECT {geoIpCityFields}
                     FROM CityIP where CityIPID > @startId order by CityIPID limit @count",
@@ -58,7 +58,7 @@ namespace GeoIpDb.Repo
                         return geoIpCity;
                     },
                     splitOn: "IPRangeStart",
-                    param: new { startId, count });
+                    param: new { startId, count }).ToList();
         }
 
         public long GetCount()

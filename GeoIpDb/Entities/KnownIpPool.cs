@@ -17,5 +17,7 @@ namespace GeoIpDb.Entities
 
         public bool IsGood { get; set; }
 
+        public int? ApplicationId { get; set; }
+
     }
 }

@@ -20,21 +20,21 @@ namespace VPNConnect.Net
     internal class NetQualityAnalyzer
     {
         int retries;
-        private readonly List<string> blacklistCountries;
+        private readonly List<string> blacklistCountryIds;
         string pingTarget;
 
 
         public NetQualityAnalyzer(string pingTarget, int retries, 
-            List<string> blacklistCountries)
+            List<string> blacklistCountryIds)
         {
             this.pingTarget = pingTarget;
             this.retries = retries;
-            this.blacklistCountries = blacklistCountries;
+            this.blacklistCountryIds = blacklistCountryIds;
         }
 
         public bool IsCountryBlacklisted(string connectionIpCountry)
         {
-            return blacklistCountries.Any(c => c.ToLower() == connectionIpCountry.ToLower());
+            return blacklistCountryIds.Any(c => c.ToLower() == connectionIpCountry.ToLower());
 
         }
 

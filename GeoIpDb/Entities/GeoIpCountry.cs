@@ -12,6 +12,5 @@ namespace GeoIpDb.Entities
 
         public string Name { get; set; }
 
-        public bool IsBlacklisted { get; set; }
     }
 }

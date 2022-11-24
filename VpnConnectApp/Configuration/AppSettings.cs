@@ -9,6 +9,8 @@
 
         public NetAnanlyzeSettings NetAnanlyzeSettings { get; init; }
 
+        public TargetApplicationSettings TargetApplicationSettings { get; init; }
+
         public string ExternalIpServiceLink { get; init; }
 
     }

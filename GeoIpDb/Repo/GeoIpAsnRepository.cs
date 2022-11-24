@@ -35,7 +35,7 @@ namespace GeoIpDb.Repo
                     param: new { ip = GeoIpUtils.IpToHex(ip) }).FirstOrDefault();
         }
 
-        public IEnumerable <GeoIpAsnIp> GetPage(long startId, long count)
+        public List <GeoIpAsnIp> GetPage(long startId, long count)
         {
             return connection.Query<GeoIpAsnIp, GeoIpAsn, IpRange, GeoIpAsnIp>(@$"SELECT {geoIpAsnIpFields}  FROM ASNIP
                     join ASN on ASNIP.ASNID = ASN.ASNID WHERE ASNIPID > @startId order by ASNIPID limit @count",
@@ -47,7 +47,7 @@ namespace GeoIpDb.Repo
                      },
                     splitOn: "ASNID, IPRangeStart",
 
-                    param: new { startId, count });
+                    param: new { startId, count }).ToList();
         }
 
         public long GetCount()
