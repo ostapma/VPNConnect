@@ -9,6 +9,8 @@ using System.Threading.Tasks;
 using GeoIpDb.Repo;
 using GeoIpDb.Entities;
 using GeoIp;
+using static System.Net.Mime.MediaTypeNames;
+using System.ComponentModel;
 
 namespace GeoIpDb.Repo
 {
@@ -64,6 +66,8 @@ namespace GeoIpDb.Repo
                     endIpHex = GeoIpUtils.IpToHex(knownIpPool.IpRange.IpRangeEnd),
                     appId = knownIpPool.ApplicationId
                 });
+
+            knownIpPool.KnownIpPoolId = Convert.ToInt32(connection.ExecuteScalar("SELECT last_insert_rowid()"));
 
         }
 

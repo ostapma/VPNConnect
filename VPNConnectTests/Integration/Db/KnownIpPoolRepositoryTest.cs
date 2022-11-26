@@ -29,6 +29,7 @@ namespace VpnConnectTests.Integration.Db
             var actual = repo.GetByIpAddress("255.255.255.1");
 
             Assert.NotNull(actual);
+            Assert.AreNotEqual(actual.KnownIpPoolId, 0);
             Assert.AreEqual(testIpPool.IpRange, actual.IpRange);
             Assert.AreEqual(testIpPool.IsGood, actual.IsGood);
             Assert.AreEqual(testIpPool.Comments, actual.Comments);

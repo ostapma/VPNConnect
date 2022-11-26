@@ -32,6 +32,7 @@ namespace VpnConnectTests.Integration.Db
         {
 
             testDbMaker = new TestDbMaker();
+            testDbMaker.Cleanup();
             string testDbPath = testDbMaker.Make();
             connString = $"Data Source = {testDbPath}";
            

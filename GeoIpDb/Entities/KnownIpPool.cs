@@ -8,6 +8,7 @@ namespace GeoIpDb.Entities
 {
     public class KnownIpPool
     {
+        public int KnownIpPoolId { get; set; }  
         public IpRange IpRange { get; set; }
 
         public DateTime DateAdded { get; set; }
