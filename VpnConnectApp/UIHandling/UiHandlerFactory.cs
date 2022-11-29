@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using VpnConnect.VpnServices;
 
 namespace VPNConnect.UIHandling
 {
@@ -12,8 +13,8 @@ namespace VPNConnect.UIHandling
         {
             return vpnService switch
             {
-                VpnServiceType.Windscribe => new WindscribeUiHandler(),
-                VpnServiceType.Hideme => new HidemeUiHandler(),
+                VpnServiceType.Windscribe => new WindscribeVpnService(),
+                VpnServiceType.Hideme => new HidemeVpnService(),
                 _ => throw new NotImplementedException()
             };
         }
