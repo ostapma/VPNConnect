@@ -1,7 +1,9 @@
-﻿using NonInvasiveKeyboardHookLibrary;
+﻿using Autofac.Core;
+using NonInvasiveKeyboardHookLibrary;
+using System.CommandLine;
 using System.Runtime.InteropServices;
 using VpnConnect.Configuration;
-using VpnConnect.Console.Presenter;
+using VpnConnect.Console.Presenters;
 using VpnConnect.VpnServices;
 using VPNConnect;
 using VPNConnect.Configuration;
@@ -14,10 +16,42 @@ var config = ConfigManager.Get();
 
 var vpnServiceFactory = new VpnServiceFactory();
 
+VpnService service= null;
+
 SelectVpnServicePresenter selectVpnServicePresenter = new SelectVpnServicePresenter(vpnServiceFactory);
 
-selectVpnServicePresenter.OnSelected = (service) =>
+var selectVpnOption = new Option<string>("--vpnservice", "Select vpn service")
+    .FromAmong(vpnServiceFactory.GetList().Select(s => s.Name.ToLower()).ToArray());
+selectVpnOption.AddAlias("-v");
+selectVpnOption.Arity = ArgumentArity.ZeroOrOne;
+
+
+var rootCommand = new RootCommand();
+rootCommand.AddOption(selectVpnOption);
+rootCommand.SetHandler(selectVpnOptionValue =>
 {
+    if(selectVpnOptionValue!=null)
+    {
+        service = vpnServiceFactory.Get(selectVpnOptionValue);
+        StartSearch(service);
+    }
+}, selectVpnOption);
+
+rootCommand.Invoke(args);
+
+if (service == null)
+{
+    selectVpnServicePresenter.OnSelected += (service) =>
+    {
+        StartSearch(service);
+    };
+    selectVpnServicePresenter.Select();
+}
+
+
+void StartSearch(VpnService service)
+{
+    selectVpnServicePresenter.ShowSelected(service);
     VpnSearchSettings settings = ConfigManager.Get().Settings();
 
     Console.WriteLine($"Put your mouse cursor on {service.Name} VPN client's connection button center");
@@ -41,7 +75,7 @@ selectVpnServicePresenter.OnSelected = (service) =>
     };
 
     Application.Run();
-};
+}
 
-selectVpnServicePresenter.Select();
+
 

@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using VpnConnect.Console.View;
+using VpnConnect.Console.Views;
 using VpnConnect.VpnServices;
 
-namespace VpnConnect.Console.Presenter
+namespace VpnConnect.Console.Presenters
 {
     internal class SelectVpnServicePresenter
     {
@@ -18,7 +18,8 @@ namespace VpnConnect.Console.Presenter
         {
             view= new SelectVpnServiceView();
             this.vpnServiceFactory = vpnServiceFactory;
-            view.OnSelected = (name) =>
+
+            view.OnSelected += (name) =>
             {
                 OnSelected(vpnServiceFactory.Get(name));
             };
@@ -26,9 +27,14 @@ namespace VpnConnect.Console.Presenter
 
         public void Select()
         {
-            view.ShowSelect(vpnServiceFactory.GetList().Select(s => s.Name).ToList());
+            view.AskSelect(vpnServiceFactory.GetList().Select(s => s.Name).ToList());
         }
 
-        public Action<VpnService?> OnSelected;
+        public void ShowSelected(VpnService service)
+        {
+            view.ShowSelected(service.Name);
+        }
+
+        public event Action<VpnService?> OnSelected;
     }
 }

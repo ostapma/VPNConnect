@@ -6,11 +6,11 @@ using System.Text;
 using System.Threading.Tasks;
 using VpnConnect.VpnServices;
 
-namespace VpnConnect.Console.View
+namespace VpnConnect.Console.Views
 {
     internal class SelectVpnServiceView
     {
-        public void ShowSelect(List<string> services)
+        public void AskSelect(List<string> services)
         {
             var selected = AnsiConsole.Prompt(
                 new SelectionPrompt<string>()
@@ -19,6 +19,11 @@ namespace VpnConnect.Console.View
             OnSelected(selected);
         }
 
-        public Action<string> OnSelected;
+        public void ShowSelected(string selectedService)
+        {
+            AnsiConsole.MarkupLine($"Selected vpn service: [blue]{selectedService}[/]");
+        }
+
+        public event Action<string> OnSelected;
     }
 }
