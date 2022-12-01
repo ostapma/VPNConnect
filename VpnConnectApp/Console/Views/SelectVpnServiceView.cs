@@ -10,20 +10,18 @@ namespace VpnConnect.Console.Views
 {
     internal class SelectVpnServiceView
     {
-        public void AskSelect(List<string> services)
+        public void AskSelect(List<string> services, Action<string> onSelected)
         {
             var selected = AnsiConsole.Prompt(
                 new SelectionPrompt<string>()
                 .Title("Select VPN service you are using")
                 .AddChoices(services));
-            OnSelected(selected);
+            onSelected(selected);
         }
 
         public void ShowSelected(string selectedService)
         {
             AnsiConsole.MarkupLine($"Selected vpn service: [blue]{selectedService}[/]");
         }
-
-        public event Action<string> OnSelected;
     }
 }

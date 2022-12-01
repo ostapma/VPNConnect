@@ -1,5 +1,7 @@
-﻿using System;
+﻿using Autofac.Core;
+using System;
 using System.Collections.Generic;
+using System.CommandLine;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -19,22 +21,24 @@ namespace VpnConnect.Console.Presenters
             view= new SelectVpnServiceView();
             this.vpnServiceFactory = vpnServiceFactory;
 
-            view.OnSelected += (name) =>
+        }
+
+        public void ShowSelector() {
+            view.AskSelect(vpnServiceFactory.GetList().Select(s => s.Name).ToList(), SelectVpn);
+        }
+
+        public void SelectVpn(string name)
+        {
+            var selectedService = vpnServiceFactory.Get(name);
+            if (selectedService != null)
             {
-                OnSelected(vpnServiceFactory.Get(name));
-            };
+                OnSelected.Invoke(selectedService);
+                view.ShowSelected(name);
+            }
+            else throw new ArgumentException($"Invalid value {name}");
         }
 
-        public void Select()
-        {
-            view.AskSelect(vpnServiceFactory.GetList().Select(s => s.Name).ToList());
-        }
 
-        public void ShowSelected(VpnService service)
-        {
-            view.ShowSelected(service.Name);
-        }
-
-        public event Action<VpnService?> OnSelected;
+        public event Action<VpnService> OnSelected;
     }
 }

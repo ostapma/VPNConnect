@@ -2,7 +2,9 @@
 using NonInvasiveKeyboardHookLibrary;
 using System.CommandLine;
 using System.Runtime.InteropServices;
+using System.Security;
 using VpnConnect.Configuration;
+using VpnConnect.Console.Commands;
 using VpnConnect.Console.Presenters;
 using VpnConnect.VpnServices;
 using VPNConnect;
@@ -16,42 +18,12 @@ var config = ConfigManager.Get();
 
 var vpnServiceFactory = new VpnServiceFactory();
 
-VpnService service= null;
-
 SelectVpnServicePresenter selectVpnServicePresenter = new SelectVpnServicePresenter(vpnServiceFactory);
 
-var selectVpnOption = new Option<string>("--vpnservice", "Select vpn service")
-    .FromAmong(vpnServiceFactory.GetList().Select(s => s.Name.ToLower()).ToArray());
-selectVpnOption.AddAlias("-v");
-selectVpnOption.Arity = ArgumentArity.ZeroOrOne;
+SelectVpnServiceOption selectVpnServiceOption = new SelectVpnServiceOption(vpnServiceFactory.GetList().Select(s => s.Name.ToLower()).ToList());
 
-
-var rootCommand = new RootCommand();
-rootCommand.AddOption(selectVpnOption);
-rootCommand.SetHandler(selectVpnOptionValue =>
+selectVpnServicePresenter.OnSelected += (service) =>
 {
-    if(selectVpnOptionValue!=null)
-    {
-        service = vpnServiceFactory.Get(selectVpnOptionValue);
-        StartSearch(service);
-    }
-}, selectVpnOption);
-
-rootCommand.Invoke(args);
-
-if (service == null)
-{
-    selectVpnServicePresenter.OnSelected += (service) =>
-    {
-        StartSearch(service);
-    };
-    selectVpnServicePresenter.Select();
-}
-
-
-void StartSearch(VpnService service)
-{
-    selectVpnServicePresenter.ShowSelected(service);
     VpnSearchSettings settings = ConfigManager.Get().Settings();
 
     Console.WriteLine($"Put your mouse cursor on {service.Name} VPN client's connection button center");
@@ -74,8 +46,14 @@ void StartSearch(VpnService service)
         searcher.Stop();
     };
 
-    Application.Run();
+};
+
+string serviceTypeStr = selectVpnServiceOption.GetValue(string.Join(" ", args));
+if (serviceTypeStr != null)
+{
+    selectVpnServicePresenter.SelectVpn(serviceTypeStr);
 }
+else selectVpnServicePresenter.ShowSelector();
 
-
+Application.Run();
 
