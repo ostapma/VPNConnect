@@ -1,4 +1,4 @@
-﻿using VPNConnect.UIHandling;
+﻿using VPNConnect.VpnClientHandling;
 
 namespace VpnConnect.VpnServices
 {

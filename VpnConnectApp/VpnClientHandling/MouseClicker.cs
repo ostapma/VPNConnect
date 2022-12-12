@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace VPNConnect.UIHandling
+namespace VPNConnect.VpnClientHandling
 {
     internal class MouseClicker
     {

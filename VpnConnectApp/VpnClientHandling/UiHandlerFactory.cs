@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using VpnConnect.VpnServices;
 
-namespace VPNConnect.UIHandling
+namespace VPNConnect.VpnClientHandling
 {
     internal class UiHandlerFactory
     {

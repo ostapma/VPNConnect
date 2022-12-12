@@ -17,29 +17,21 @@ namespace VpnConnect.Console.Commands
 
         public SelectVpnServiceOption(List<string> serviceList)
         {
+
             this.serviceList = serviceList;
         }
 
-        public string? GetValue(string commandLine)
+        public Option<string> GetOption()
         {
-            string? value = null;  
             var selectVpnOption = new Option<string>(Name, Description)
                .FromAmong(serviceList.ToArray());
             selectVpnOption.AddAlias(Alias);
             selectVpnOption.Arity = ArgumentArity.ZeroOrOne;
-
             var rootCommand = new RootCommand();
-            rootCommand.AddOption(selectVpnOption);
-            rootCommand.SetHandler(selectVpnOptionValue =>
-            {
-                if (selectVpnOptionValue != null)
-                {
-                    value = selectVpnOptionValue;
-                }
-            }, selectVpnOption);
 
-            rootCommand.Invoke(commandLine);
-            return value;
+            rootCommand.AddOption(selectVpnOption);
+            rootCommand.SetHandler(val => { }, selectVpnOption);
+            return selectVpnOption;
         }
 
         

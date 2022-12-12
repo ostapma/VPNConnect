@@ -1,4 +1,4 @@
-﻿namespace VPNConnect.UIHandling
+﻿namespace VPNConnect.VpnClientHandling
 {
     internal interface IVpnUiHandler
     {

@@ -24,7 +24,7 @@ namespace VpnConnect.Console.Presenters
         }
 
         public void ShowSelector() {
-            view.AskSelect(vpnServiceFactory.GetList().Select(s => s.Name).ToList(), SelectVpn);
+            view.ShowSelector(vpnServiceFactory.GetList().Select(s => s.Name).ToList(), SelectVpn);
         }
 
         public void SelectVpn(string name)
@@ -32,8 +32,8 @@ namespace VpnConnect.Console.Presenters
             var selectedService = vpnServiceFactory.Get(name);
             if (selectedService != null)
             {
-                OnSelected.Invoke(selectedService);
                 view.ShowSelected(name);
+                OnSelected.Invoke(selectedService);
             }
             else throw new ArgumentException($"Invalid value {name}");
         }

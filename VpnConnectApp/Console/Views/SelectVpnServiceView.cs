@@ -10,7 +10,7 @@ namespace VpnConnect.Console.Views
 {
     internal class SelectVpnServiceView
     {
-        public void AskSelect(List<string> services, Action<string> onSelected)
+        public void ShowSelector(List<string> services, Action<string> onSelected)
         {
             var selected = AnsiConsole.Prompt(
                 new SelectionPrompt<string>()
