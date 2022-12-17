@@ -12,21 +12,20 @@ using VPNConnect.Configuration;
 
 namespace VpnConnect.Console.Commands
 {
-    internal class VpnSearchCommand
+    internal class VpnSearchCommandBuilder
     {
         protected string Name { get; } = "vpnsearch";
 
         protected string Description { get; } = "Search vpn by criteria in settings";
 
-        public void Execute(string commandline) {
+        public Command Build() {
             var searchCommand = new Command(Name, Description);
             var vpnServiceFactory = new VpnServiceFactory();
-            SelectVpnServiceOption selectVpnServiceOption = new SelectVpnServiceOption(vpnServiceFactory.GetList().Select(s => s.Name.ToLower()).ToList());
-            Option<string> selOption = selectVpnServiceOption.GetOption();
+            SelectVpnServiceOptionBuilder selectVpnServiceOption = new SelectVpnServiceOptionBuilder(vpnServiceFactory.GetList().Select(s => s.Name.ToLower()).ToList());
+            Option<string> selOption = selectVpnServiceOption.Build();
             SelectVpnServicePresenter selectVpnServicePresenter = new SelectVpnServicePresenter(vpnServiceFactory);
-
-            RootCommand rootCommand = new RootCommand();
-            rootCommand.Add(searchCommand);
+            searchCommand.AddOption(selOption);
+            
             searchCommand.SetHandler((selectVpnOptionValue) =>
             {
                 if (selectVpnOptionValue != null)
@@ -35,33 +34,25 @@ namespace VpnConnect.Console.Commands
                 }
                 else selectVpnServicePresenter.ShowSelector();
             }, selOption);
-            rootCommand.Invoke(commandline);
+
 
             selectVpnServicePresenter.OnSelected += (service) =>
             {
                 VpnSearchSettings settings = ConfigManager.Get().Settings();
 
                 VpnSearcher searcher = new(service, settings);
-                VpnSearchPresenter searchPresenter = new VpnSearchPresenter(service, settings, searcher);
-                searchPresenter.ShowStartPrompt();
-
-                try
+                Action onStopped = () =>
                 {
-                    searchPresenter.SubscribeKeys();
-                }
-
-                catch (Exception e)
-                {
-                    Log.Error($"Something went wrong on start: {e}");
-                }
-
-                Application.ApplicationExit += (ev, t) =>
-                {
-                    searchPresenter.StopSearch();
-                    searchPresenter.UnsubscribeKeys();
+                    Application.Exit();
                 };
+                VpnSearchPresenter searchPresenter = new VpnSearchPresenter(service, settings, searcher, onStopped);
+                searchPresenter.Start();
 
+
+                Application.Run();
             };
+
+            return searchCommand;
         }
     }
 }

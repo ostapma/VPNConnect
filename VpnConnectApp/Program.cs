@@ -16,9 +16,22 @@ Log.Logger = new LoggerConfiguration().WriteTo.Console().CreateLogger();
 
 var config = ConfigManager.Get();
 
-VpnSearchCommand searchCommand= new VpnSearchCommand();
+
+CliInputPresenter cliInputPresenter= new CliInputPresenter();
+VpnRootCommand vpnRootCommand= new VpnRootCommand();
+vpnRootCommand.Register();
+string command;
 if (args.Count() > 0)
-    searchCommand.Execute(string.Join(" ", args));
-else searchCommand.Execute("vpnsearch");
-Application.Run();
+{
+    command = string.Join(" ", args);
+    vpnRootCommand.Execute(command);
+}
+while(true)
+{
+    command = cliInputPresenter.InputCommand();
+    vpnRootCommand.Execute(command);
+}
+
+
+
 

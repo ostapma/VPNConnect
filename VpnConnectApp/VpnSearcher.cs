@@ -18,9 +18,11 @@ namespace VPNConnect
     internal class VpnSearcher
     {
         public bool IsStarted { get; private set; }
+        public bool IsStopping { get; private set; }
 
         private readonly IVpnUiHandler vpnUiHandler;
         private readonly VpnSearchSettings settings;
+        public event Action OnSearchStopped;
         private string currentIp;
         ExternalIpServiceProvider externalIpServiceProvider;
         private GeoIpCityRepository geoIpCityRepository;
@@ -54,10 +56,15 @@ namespace VPNConnect
 
         public void StopSearch()
         {
-            if (IsStarted)
+            if (IsStarted&&!IsStopping)
             {
                 Log.Information($"Stopping search");
                 IsStarted = false;
+                IsStopping = true;
+            }
+            if (!IsStarted&&!IsStopping)
+            {
+                OnSearchStopped.Invoke();
             }
         }
 
@@ -155,6 +162,8 @@ namespace VPNConnect
                     }
                 }
 
+                OnSearchStopped.Invoke();
+                IsStopping = false;
                 Log.Information("VPN searching has stopped");
 
             }

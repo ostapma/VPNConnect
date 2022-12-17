@@ -19,14 +19,23 @@ namespace VpnConnect.Console.Presenters
         KeyboardHookManager keyboardHookManager = new();
         private VpnSearchView view = new VpnSearchView();
 
-        public VpnSearchPresenter(VpnService service, VpnSearchSettings settings, VpnSearcher searcher)
+
+        public VpnSearchPresenter(VpnService service, VpnSearchSettings settings, VpnSearcher searcher, Action onStopped)
         {
             this.service = service;
             this.settings = settings;
             this.searcher = searcher;
+            searcher.OnSearchStopped += Searcher_OnSearchStopped;
+            searcher.OnSearchStopped += onStopped;
         }
 
-        public void SubscribeKeys()
+        private void Searcher_OnSearchStopped()
+        {
+            UnsubscribeKeys();
+            view.ShowSearchStopped();
+        }
+
+        void SubscribeKeys()
         {
 
             keyboardHookManager.Start();
@@ -39,7 +48,7 @@ namespace VpnConnect.Console.Presenters
         }
 
 
-        public void UnsubscribeKeys()
+        void UnsubscribeKeys()
         {
             keyboardHookManager.UnregisterHotkey(GetVcode(settings.ConsoleSettings.StopHotKey));
             keyboardHookManager.UnregisterHotkey(GetVcode(settings.ConsoleSettings.StartHotKey));
@@ -65,17 +74,17 @@ namespace VpnConnect.Console.Presenters
             }
         }
 
-        public void StopSearch()
+        void StopSearch()
         {
-            if (searcher.IsStarted)
-            {
-                view.ShowSearchStop(settings.ConsoleSettings.StopHotKey);
-            }
+            
+            view.ShowSearchStop(settings.ConsoleSettings.StopHotKey);
+            
             searcher.StopSearch();
         }
 
-        internal void ShowStartPrompt()
+        internal void Start()
         {
+            SubscribeKeys();
             view.ShowStartPrompt(service.Name,settings.ConsoleSettings.StartHotKey, settings.ConsoleSettings.StopHotKey);
         }
     }

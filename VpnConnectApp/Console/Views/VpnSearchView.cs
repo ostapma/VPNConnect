@@ -23,7 +23,12 @@ namespace VpnConnect.Console.Views
         internal void ShowSearchStop(string stopKey)
         {
             AnsiConsole.MarkupLine($"Search stop [blue]{stopKey}[/] pressed");
-            AnsiConsole.MarkupLine("Wait for VPN searching to stop");
+            AnsiConsole.MarkupLine("Waiting for VPN search to stop");
+        }
+
+        internal void ShowSearchStopped()
+        {
+            AnsiConsole.MarkupLine("VPN search has been stopped");
         }
 
         internal void ShowStartPrompt(string vpnName, string startKey, string stopKey)

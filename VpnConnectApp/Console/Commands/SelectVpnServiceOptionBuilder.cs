@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace VpnConnect.Console.Commands
 {
-    internal class SelectVpnServiceOption
+    internal class SelectVpnServiceOptionBuilder
     {
         private readonly List<string> serviceList;
 
@@ -15,13 +15,13 @@ namespace VpnConnect.Console.Commands
         protected string Alias { get; } = "-v";
         protected string Description { get; } = "Select vpn service";
 
-        public SelectVpnServiceOption(List<string> serviceList)
+        public SelectVpnServiceOptionBuilder(List<string> serviceList)
         {
 
             this.serviceList = serviceList;
         }
 
-        public Option<string> GetOption()
+        public Option<string> Build()
         {
             var selectVpnOption = new Option<string>(Name, Description)
                .FromAmong(serviceList.ToArray());
