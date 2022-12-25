@@ -27,10 +27,10 @@ namespace VpnConnect.Console.Commands
                .FromAmong(serviceList.ToArray());
             selectVpnOption.AddAlias(Alias);
             selectVpnOption.Arity = ArgumentArity.ZeroOrOne;
-            var rootCommand = new RootCommand();
+            //var rootCommand = new RootCommand();
 
-            rootCommand.AddOption(selectVpnOption);
-            rootCommand.SetHandler(val => { }, selectVpnOption);
+            //rootCommand.AddOption(selectVpnOption);
+            //rootCommand.SetHandler(val => { }, selectVpnOption);
             return selectVpnOption;
         }
 

@@ -12,14 +12,16 @@ using VPNConnect.Configuration;
 
 namespace VpnConnect.Console.Commands
 {
-    internal class VpnSearchCommandBuilder
+    internal class VpnSearchCommandBuilder: BaseCommandBuilder
     {
-        protected string Name { get; } = "vpnsearch";
+        public VpnSearchCommandBuilder()
+        {
+            Name  = "vpnsearch";
+            Description = "Search vpn by criteria in settings";
+        }
 
-        protected string Description { get; } = "Search vpn by criteria in settings";
-
-        public Command Build() {
-            var searchCommand = new Command(Name, Description);
+        public override Command Build() {
+            var searchCommand = new Command(Name,Description);
             var vpnServiceFactory = new VpnServiceFactory();
             SelectVpnServiceOptionBuilder selectVpnServiceOption = new SelectVpnServiceOptionBuilder(vpnServiceFactory.GetList().Select(s => s.Name.ToLower()).ToList());
             Option<string> selOption = selectVpnServiceOption.Build();

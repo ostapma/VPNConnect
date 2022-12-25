@@ -14,8 +14,8 @@ namespace VpnConnect.Console.Commands
         public void Register()
         {
             rootCommand = new RootCommand();
-            VpnSearchCommandBuilder searchCommand = new VpnSearchCommandBuilder();
-            rootCommand.AddCommand(searchCommand.Build());
+            rootCommand.AddCommand(new VpnSearchCommandBuilder().Build());
+            rootCommand.AddCommand(new IpInfoCommandBuilder().Build());
         }
 
         public void Execute(string commandLine) {
