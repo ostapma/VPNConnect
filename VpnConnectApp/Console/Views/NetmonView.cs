@@ -24,15 +24,16 @@ namespace VpnConnect.Console.Views
     {
         public NetmonData(int resultBufferSize)
         {
-            PingResults = new Queue<PingResult>(resultBufferSize);
+            PingResults = new PingResult[resultBufferSize];
         }
         public DateTime TimeStamp { get; set; }
-        public Queue<PingResult> PingResults { get; private set; }
+        public PingResult[] PingResults { get; private set; }
         public int TolerableLatency { get; set; }
     }
 
     internal class NetmonView
     {
+        private const int RefreshRateMs = 1000;
         private readonly int rowsToShow;
 
         public NetmonView(NetmonData dataToShow, int rowsToShow)
@@ -52,11 +53,12 @@ namespace VpnConnect.Console.Views
             table.AddColumn(new TableColumn("Time"));
             table.AddColumn(new TableColumn("|"));
             table.AddColumn(new TableColumn("Latency"));
-            
+
             for (int i = 0; i < rowsToShow; i++)
             {
                 table.AddEmptyRow();
             }
+
 
             AnsiConsole.Live(table).Start(
                 ctx =>
@@ -67,22 +69,32 @@ namespace VpnConnect.Console.Views
                     {
                         if (dataToShow != null)
                         {
-                            if (lastUpdateTime != dataToShow.TimeStamp)
+                            //if (lastUpdateTime != dataToShow.TimeStamp)
                             {
+
                                 int i = 0;
-                                foreach  (var result in dataToShow.PingResults.ToList().OrderByDescending(r=>r.PingTime).Take(rowsToShow))
+                                foreach (var result in dataToShow.PingResults.Where(pr=>pr is not null).ToList().OrderByDescending(r => r.PingTime).Take(rowsToShow))
                                 {
-                                    table.UpdateCell(i, 0, result.PingTime.ToString());
-                                    table.UpdateCell(i, 2, GetLatencyStr(result));
+                                    if (i == 0)
+                                    {
+                                        table.UpdateCell(i, 0, $"[green]{result.PingTime}[/]");
+                                        table.UpdateCell(i, 2, $"[green]{GetLatencyStr(result)}[/]");
+                                    }
+                                    else
+                                    {
+                                        table.UpdateCell(i, 0, result.PingTime.ToString());
+                                        table.UpdateCell(i, 2, GetLatencyStr(result));
+                                    }
                                     i++;
                                 }
 
                                 lastUpdateTime = dataToShow.TimeStamp;
                                 ctx.Refresh();
+
                             }
 
                         }
-                        Thread.Sleep(1000);
+                        Thread.Sleep(RefreshRateMs);
                     }
                 });
         }

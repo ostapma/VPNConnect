@@ -36,15 +36,29 @@ namespace VpnConnect.Console.Presenters
                     pingResult.PingTime = DateTime.Now;
                     Ping ping = new Ping();
                     PingReply? result;
-                    result = ping.Send(pingTarget);
-                    pingResult.IsSuccess = result.Status == IPStatus.Success;
-                    if (result.Status == IPStatus.Success)
+                    try
                     {
-                        pingResult.PingLatency = (int)result.RoundtripTime;
+                        result = ping.Send(pingTarget);
+                        pingResult.IsSuccess = result.Status == IPStatus.Success;
+                        if (pingResult.IsSuccess)
+                        {
+                            pingResult.PingLatency = (int)result.RoundtripTime;
+                        }
+                        else pingResult.Error = result.Status.ToString();
                     }
-                    else pingResult.Error = result.Status.ToString();
-                    data.PingResults.Enqueue(pingResult);
-                    if (data.PingResults.Count> dataBufferSize) data.PingResults.Dequeue();
+
+                    catch (PingException ex) {
+                        pingResult.IsSuccess=false;
+                        pingResult.PingLatency = 0;
+                        pingResult.Error = ex.InnerException!=null?ex.InnerException.Message : ex.Message;
+                    }
+                    
+                    for (int i = data.PingResults.Length-1; i > 0; i--)
+                    {
+                        data.PingResults[i] = data.PingResults[i-1];
+
+                    }
+                    data.PingResults[0] = pingResult;
                     Thread.Sleep(1000);
                 }
             });
