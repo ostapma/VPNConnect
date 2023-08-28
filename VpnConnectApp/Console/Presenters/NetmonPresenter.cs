@@ -5,6 +5,7 @@ using System.Net.NetworkInformation;
 using System.Text;
 using System.Threading.Tasks;
 using VpnConnect.Console.Views;
+using VpnConnect.Net;
 
 namespace VpnConnect.Console.Presenters
 {
@@ -29,36 +30,21 @@ namespace VpnConnect.Console.Presenters
             isStarted = true;
             Task.Factory.StartNew(() =>
             {
+                ExternalPingWrapper externalPingWrapperVpn = new ExternalPingWrapper("Vpn", pingTarget);
+                ExternalPingWrapper externalPingWrapperBypass = new ExternalPingWrapper("Bypass", pingTarget);
                 while (isStarted)
                 {
                     data.TimeStamp= DateTime.Now;
-                    PingResult pingResult = new PingResult();
-                    pingResult.PingTime = DateTime.Now;
-                    Ping ping = new Ping();
-                    PingReply? result;
-                    try
-                    {
-                        result = ping.Send(pingTarget);
-                        pingResult.IsSuccess = result.Status == IPStatus.Success;
-                        if (pingResult.IsSuccess)
-                        {
-                            pingResult.PingLatency = (int)result.RoundtripTime;
-                        }
-                        else pingResult.Error = result.Status.ToString();
-                    }
 
-                    catch (PingException ex) {
-                        pingResult.IsSuccess=false;
-                        pingResult.PingLatency = 0;
-                        pingResult.Error = ex.InnerException!=null?ex.InnerException.Message : ex.Message;
-                    }
                     
                     for (int i = data.PingResults.Length-1; i > 0; i--)
                     {
                         data.PingResults[i] = data.PingResults[i-1];
 
                     }
-                    data.PingResults[0] = pingResult;
+
+                    data.PingResults[0] =( externalPingWrapperVpn.GetPingResult(), externalPingWrapperBypass.GetPingResult());
+
                     Thread.Sleep(1000);
                 }
             });

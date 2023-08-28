@@ -12,10 +12,16 @@ using VPNConnect.Configuration;
 using VPNConnect.VpnClientHandling;
 
 
-Log.Logger = new LoggerConfiguration().WriteTo.Console().CreateLogger();
+//[DllImport("kernel32.dll", SetLastError = true)]
+//[return: MarshalAs(UnmanagedType.Bool)]
+//static extern bool AllocConsole();
 
-var config = ConfigManager.Get();
+//Log.Logger = new LoggerConfiguration().WriteTo.Console().CreateLogger();
 
+//var config = ConfigManager.Get();
+
+
+//AllocConsole();
 
 CliInputPresenter cliInputPresenter= new CliInputPresenter();
 VpnRootCommand vpnRootCommand= new VpnRootCommand();

@@ -1,4 +1,5 @@
-﻿using Spectre.Console;
+﻿using ExternalPing;
+using Spectre.Console;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,26 +9,14 @@ using System.Threading.Tasks;
 
 namespace VpnConnect.Console.Views
 {
-    internal class PingResult
-    {
-        public DateTime PingTime { get; set; }
-        public int PingLatency { get; set; }
-        public bool IsSuccess
-        {
-            get; set;
-        }
-
-        public string Error { get; set; }
-    }
-
     internal class NetmonData
     {
         public NetmonData(int resultBufferSize)
         {
-            PingResults = new PingResult[resultBufferSize];
+            PingResults = new (PingResult vpnPing, PingResult bypassPing)?[resultBufferSize];
         }
         public DateTime TimeStamp { get; set; }
-        public PingResult[] PingResults { get; private set; }
+        public (PingResult vpnPing, PingResult bypassPing )?[] PingResults { get; private set; }
         public int TolerableLatency { get; set; }
     }
 
@@ -52,7 +41,9 @@ namespace VpnConnect.Console.Views
             table.Border(TableBorder.Horizontal);
             table.AddColumn(new TableColumn("Time"));
             table.AddColumn(new TableColumn("|"));
-            table.AddColumn(new TableColumn("Latency"));
+            table.AddColumn(new TableColumn("Latency Vpn"));
+            table.AddColumn(new TableColumn("|"));
+            table.AddColumn(new TableColumn("Latency Bypass"));
 
             for (int i = 0; i < rowsToShow; i++)
             {
@@ -73,17 +64,20 @@ namespace VpnConnect.Console.Views
                             {
 
                                 int i = 0;
-                                foreach (var result in dataToShow.PingResults.Where(pr=>pr is not null).ToList().OrderByDescending(r => r.PingTime).Take(rowsToShow))
+                                foreach (var result in dataToShow.PingResults.Where(pr=>pr is not null).ToList()
+                                    .OrderByDescending(r => r.Value.vpnPing.PingTime).Take(rowsToShow))
                                 {
                                     if (i == 0)
                                     {
-                                        table.UpdateCell(i, 0, $"[green]{result.PingTime}[/]");
-                                        table.UpdateCell(i, 2, $"[green]{GetLatencyStr(result)}[/]");
+                                        table.UpdateCell(i, 0, $"[green]{result.Value.vpnPing.PingTime}[/]");
+                                        table.UpdateCell(i, 2, $"[green]{GetLatencyStr(result.Value.vpnPing)}[/]");
+                                        table.UpdateCell(i, 4, $"[green]{GetLatencyStr(result.Value.bypassPing)}[/]");
                                     }
                                     else
                                     {
-                                        table.UpdateCell(i, 0, result.PingTime.ToString());
-                                        table.UpdateCell(i, 2, GetLatencyStr(result));
+                                        table.UpdateCell(i, 0, result.Value.vpnPing.PingTime.ToString());
+                                        table.UpdateCell(i, 2, GetLatencyStr(result.Value.vpnPing));
+                                        table.UpdateCell(i, 4, GetLatencyStr(result.Value.bypassPing));
                                     }
                                     i++;
                                 }

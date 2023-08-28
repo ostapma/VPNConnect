@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "ExternalPing": {
+      "commandName": "Project",
+      "commandLineArgs": "ya.ru 1000"
+    }
+  }
+}
