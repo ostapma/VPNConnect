@@ -24,19 +24,29 @@ namespace VpnConnect.Console.Views
     {
         private const int RefreshRateMs = 1000;
         private readonly int rowsToShow;
+        private bool isActive;
 
         public NetmonView(NetmonData dataToShow, int rowsToShow)
         {
-           this.dataToShow = dataToShow;
+            this.dataToShow = dataToShow;
             this.rowsToShow = rowsToShow;
         }
 
-        public event Action OnStop;
+
+
 
         private NetmonData dataToShow { get; set; }
 
-        public void ShowMonitor()
+        public void ShowMonitor(Action onStop)
         {
+            isActive = true;
+            AnsiConsole.MarkupLine("[green]Press ESC to stop[/]");
+
+            new Task(() => {
+                while (System.Console.ReadKey(false).Key!=ConsoleKey.Escape);
+                    onStop();
+                }).Start();
+
             var table = new Table().LeftAligned();
             table.Border(TableBorder.Horizontal);
             table.AddColumn(new TableColumn("Time"));
@@ -50,13 +60,14 @@ namespace VpnConnect.Console.Views
                 table.AddEmptyRow();
             }
 
-
-            AnsiConsole.Live(table).Start(
+            LiveDisplay liveDisplay = AnsiConsole.Live(table);
+            liveDisplay.AutoClear = true;
+            liveDisplay.Start(
                 ctx =>
                 {
                     ctx.Refresh();
                     DateTime lastUpdateTime = DateTime.MinValue;
-                    while (true)
+                    while (isActive)
                     {
                         if (dataToShow != null)
                         {
@@ -64,8 +75,8 @@ namespace VpnConnect.Console.Views
                             {
 
                                 int i = 0;
-                                foreach (var result in dataToShow.PingResults.Where(pr=>pr is not null).ToList()
-                                    .OrderByDescending(r => r.Value.vpnPing.PingTime).Take(rowsToShow))
+                                foreach (var result in dataToShow.PingResults.Where(pr => pr is not null).ToList()
+                                    .OrderByDescending(r => r.Value.vpnPing.PingTime).Take<(PingResult vpnPing, PingResult bypassPing)?>(rowsToShow))
                                 {
                                     if (i == 0)
                                     {
@@ -91,6 +102,12 @@ namespace VpnConnect.Console.Views
                         Thread.Sleep(RefreshRateMs);
                     }
                 });
+        }
+
+        public void Stop()
+        {
+            AnsiConsole.Clear();
+            isActive = false;
         }
 
         private string GetLatencyStr(PingResult result)

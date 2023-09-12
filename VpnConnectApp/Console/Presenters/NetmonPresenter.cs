@@ -22,7 +22,6 @@ namespace VpnConnect.Console.Presenters
         {
             view =  new NetmonView(data, latencyRows);
             this.pingTarget = pingTarget;
-            view.OnStop += OnStop;
         }
 
         public void Monitor()
@@ -49,12 +48,13 @@ namespace VpnConnect.Console.Presenters
                 }
             });
 
-            view.ShowMonitor();
+            view.ShowMonitor(Stop);
         }
 
-        private void OnStop()
+        public void Stop()
         {
-            isStarted= false;
+            isStarted = false;
+            view.Stop();
         }
     }
 }
