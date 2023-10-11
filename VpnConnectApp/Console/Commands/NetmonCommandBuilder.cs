@@ -22,10 +22,10 @@ namespace VpnConnect.Console.Commands
         {
             var command = new Command(Name, Description);
 
-            NetmonPresenter netmonPresenter = new NetmonPresenter(ConfigManager.Get().Settings().NetAnanlyzeSettings.PingTarget);
 
             command.SetHandler(() =>
             {
+                NetmonPresenter netmonPresenter = new NetmonPresenter(ConfigManager.Get().Settings().NetAnanlyzeSettings.PingTarget);
                 netmonPresenter.Monitor();
             });
             return command;

@@ -1,5 +1,4 @@
-﻿// See https://aka.ms/new-console-template for more information
-using ExternalPing;
+﻿using ExternalPing;
 using System.Net.NetworkInformation;
 using System.Text.Json;
 
