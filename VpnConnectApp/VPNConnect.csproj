@@ -23,7 +23,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ExternalPing\ExternalPing.csproj" />
     <ProjectReference Include="..\GeoIpDb\GeoIpDb.csproj" />
   </ItemGroup>
 

@@ -1,11 +1,11 @@
-﻿using ExternalPing;
-using Spectre.Console;
+﻿using Spectre.Console;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.NetworkInformation;
 using System.Text;
 using System.Threading.Tasks;
+using VPNConnect.Net;
 
 namespace VpnConnect.Console.Views
 {
@@ -47,6 +47,9 @@ namespace VpnConnect.Console.Views
                     onStop();
                 }).Start();
 
+            var rootTable = new Table().LeftAligned().NoBorder();
+            rootTable.AddColumn("");
+
             var table = new Table().LeftAligned();
             table.Border(TableBorder.Horizontal);
             table.AddColumn(new TableColumn("Time"));
@@ -60,7 +63,11 @@ namespace VpnConnect.Console.Views
                 table.AddEmptyRow();
             }
 
-            LiveDisplay liveDisplay = AnsiConsole.Live(table);
+            rootTable.AddRow(table);
+            rootTable.AddEmptyRow();
+            rootTable.AddEmptyRow();
+
+            LiveDisplay liveDisplay = AnsiConsole.Live(rootTable);
             liveDisplay.AutoClear = true;
             liveDisplay.Start(
                 ctx =>
@@ -80,9 +87,9 @@ namespace VpnConnect.Console.Views
                                 {
                                     if (i == 0)
                                     {
-                                        table.UpdateCell(i, 0, $"[green]{result.Value.vpnPing.PingTime}[/]");
+                                        table.UpdateCell(i, 0, $"[white]{result.Value.vpnPing.PingTime}[/]");
                                         table.UpdateCell(i, 2, $"[green]{GetLatencyStr(result.Value.vpnPing)}[/]");
-                                        table.UpdateCell(i, 4, $"[green]{GetLatencyStr(result.Value.bypassPing)}[/]");
+                                        table.UpdateCell(i, 4, $"[blue]{GetLatencyStr(result.Value.bypassPing)}[/]");
                                     }
                                     else
                                     {
@@ -94,6 +101,9 @@ namespace VpnConnect.Console.Views
                                 }
 
                                 lastUpdateTime = dataToShow.TimeStamp;
+
+                                rootTable.UpdateCell(1,0, $"[green]VPN Ip info here[/]");
+                                rootTable.UpdateCell(2, 0, $"[blue]Local Ip info here[/]");
                                 ctx.Refresh();
 
                             }

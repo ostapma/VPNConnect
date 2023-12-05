@@ -16,7 +16,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GeoIpDb", "GeoIpDb\GeoIpDb.csproj", "{0D357E43-2B21-4682-ADDE-7E923B17CE66}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExternalPing", "ExternalPing\ExternalPing.csproj", "{B2B433FD-22CD-4FA4-9C49-C5E3DFCBCCA6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ExternalPing", "ExternalPing\ExternalPing.csproj", "{B2B433FD-22CD-4FA4-9C49-C5E3DFCBCCA6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
