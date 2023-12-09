@@ -18,6 +18,5 @@ namespace ExternalPing
             public string Error { get; set; }
 
             public string Ip { get; set; }
-            public string Location { get; set; }
     }
 }

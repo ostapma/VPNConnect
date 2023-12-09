@@ -10,28 +10,12 @@ using VPNConnect.Net;
 
 namespace VpnConnect.Net
 {
-    internal class ExternalPingWrapper
+    internal class ExternalPingWrapper: BasePingWrapper
     {
-        public ExternalPingWrapper(string procNameSuffix, string pingTarget)
+        public ExternalPingWrapper(string procName, string pingTarget) :base(originalExternalPingProcName, procName, pingTarget)
         {
-            this.procNameSuffix = procNameSuffix;
-            this.pingTarget = pingTarget;
-            CreateProcCopy();
+            
         }
-
-        private void CreateProcCopy()
-        {
-            if (!File.Exists(GetProcName()))
-            {
-                File.Copy(originalExternalPingProcName, GetProcName());
-            }
-        }
-
-        public string GetProcName()
-        {
-            return $"{Path.GetFileNameWithoutExtension(originalExternalPingProcName)}{procNameSuffix}{Path.GetExtension(originalExternalPingProcName)}";
-        }
-
         public PingResult GetPingResult()
         {
             PingResult pingResult = null;
@@ -49,14 +33,13 @@ namespace VpnConnect.Net
                     pingResult = JsonSerializer.Deserialize<PingResult>(args.Data);
                 }
             };
-            proc.Start();
+            if (!proc.Start()) throw new Exception($"Failed to start pinger console app {GetProcName()}");
             proc.BeginOutputReadLine();
             proc.WaitForExit();
             return pingResult;
         }
 
         const string originalExternalPingProcName = "ExternalPing.exe";
-        private readonly string procNameSuffix;
-        private readonly string pingTarget;
+
     }
 }

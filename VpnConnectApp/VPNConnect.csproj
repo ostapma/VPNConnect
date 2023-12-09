@@ -23,6 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\ExternalPing\ExternalPing.csproj" />
     <ProjectReference Include="..\GeoIpDb\GeoIpDb.csproj" />
   </ItemGroup>
 
@@ -43,5 +44,9 @@
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
   </ItemGroup>
+
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="copy $(ProjectDir)..\GoPing\tcpping.exe $(ProjectDir)$(OutDir)" />
+  </Target>
 
 </Project>

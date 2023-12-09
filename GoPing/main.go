@@ -6,36 +6,36 @@ import (
 	"fmt"
 	"net"
 	"os"
+	"strconv"
 	"time"
+
+	"github.com/inancgumus/screen"
 )
 
 type PingData struct {
-	Ip        string
-	Time      string
-	LatencyMs int64
-	Error     string
+	Ip          string
+	PingTime    time.Time
+	PingLatency int64
+	Error       string
+	IsSuccess   bool
 }
 
-const PingIntervalMs = 1000
-const Port = 80
+const PingCommand = "p"
+const StopCommand = "s"
 
 func main() {
 
-	if len(os.Args) < 2 {
-		PrintError("Ping target address is not specified")
+	if len(os.Args) < 3 {
+		PrintError("Need {ping target} {port} as arguments")
 		return
 	}
-	var stop = false
 
-	go func() {
-		scanner := bufio.NewScanner(os.Stdin)
-		for scanner.Scan() {
-			if scanner.Text() == "s" {
-				stop = true
-				break
-			}
-		}
-	}()
+	Port, perr := strconv.Atoi(os.Args[2])
+	if perr != nil {
+		PrintError("Incorrect port argument")
+		return
+	}
+
 	var latencyMs int64 = 0
 	var ip net.IP = net.ParseIP(os.Args[1])
 
@@ -49,29 +49,36 @@ func main() {
 	}
 
 	if ip != nil {
-		for !stop {
-			var tstartping = time.Now()
-			d := net.Dialer{Timeout: time.Second * 10}
-			pingError := ""
-			conn, err := d.Dial("tcp4", fmt.Sprintf("%s:%d", ip, Port))
-			if err != nil {
-				pingError = err.Error()
-			} else {
-				conn.Close()
+		scanner := bufio.NewScanner(os.Stdin)
+		for scanner.Scan() {
+			if scanner.Text() == StopCommand {
+				break
+			} else if scanner.Text() == PingCommand {
+				screen.Clear()
+				screen.MoveTopLeft()
+				var tstartping = time.Now()
+				d := net.Dialer{Timeout: time.Second * 10}
+				pingError := ""
+				conn, err := d.Dial("tcp4", fmt.Sprintf("%s:%d", ip, Port))
+				if err != nil {
+					pingError = err.Error()
+				} else {
+					conn.Close()
 
-				latencyMs = time.Since(tstartping).Milliseconds()
+					latencyMs = time.Since(tstartping).Milliseconds()
+				}
+				PrintPing(ip.String(), tstartping, latencyMs, pingError)
 			}
-			PrintPing(ip.String(), tstartping.String(), latencyMs, pingError)
-			time.Sleep(PingIntervalMs * time.Millisecond)
 		}
+
 	} else {
 		PrintError("Invalid ping target address")
 	}
 
 }
 
-func PrintPing(ip string, startTime string, latencyMs int64, errormessage string) {
-	m := PingData{Ip: ip, Time: startTime, LatencyMs: latencyMs, Error: errormessage}
+func PrintPing(ip string, startTime time.Time, latencyMs int64, errormessage string) {
+	m := PingData{Ip: ip, PingTime: startTime, PingLatency: latencyMs, Error: errormessage, IsSuccess: errormessage == ""}
 	b, jerr := json.Marshal(m)
 	if jerr == nil {
 		fmt.Printf("%s\n", b)
