@@ -365,3 +365,4 @@ FodyWeavers.xsd
 geoip.db
 *.db
 *.exe
+GoPing/tcpping.exe
