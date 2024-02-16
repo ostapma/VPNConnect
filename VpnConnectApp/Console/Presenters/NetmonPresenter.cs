@@ -29,9 +29,9 @@ namespace VpnConnect.Console.Presenters
             isStarted = true;
             Task.Factory.StartNew(() =>
             {
-                TcpPingWrapper pingWrapperVpn = new TcpPingWrapper("Vpn", pingTarget, 80);
-                TcpPingWrapper pingWrapperBypass = new TcpPingWrapper("Bypass", pingTarget, 80);
-                pingWrapperVpn.StartPinging();
+                IPinger icmpPinger = new IcmpPinger(pingTarget);
+                TcpPingerWrapper pingWrapperBypass = new TcpPingerWrapper("Bypass", pingTarget, 80);
+                icmpPinger.StartPinging();
                 pingWrapperBypass.StartPinging();
                 while (isStarted)
                 {
@@ -44,11 +44,11 @@ namespace VpnConnect.Console.Presenters
 
                     }
 
-                    data.PingResults[0] =(pingWrapperVpn.GetPingResult(), pingWrapperBypass.GetPingResult());
+                    data.PingResults[0] =(icmpPinger.GetPingResult(), pingWrapperBypass.GetPingResult());
 
                     Thread.Sleep(1000);
                 }
-                pingWrapperVpn.StopPinging();
+                icmpPinger.StopPinging();
                 pingWrapperBypass.StopPinging();
             });
 

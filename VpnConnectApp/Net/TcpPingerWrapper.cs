@@ -10,7 +10,7 @@ using VPNConnect.Net;
 
 namespace VpnConnect.Net
 {
-    internal class TcpPingWrapper: BasePingWrapper
+    internal class TcpPingerWrapper : BasePingWrapper, IPinger
     {
         const string PingCommand = "p";
         const string StopCommand = "s";
@@ -21,7 +21,7 @@ namespace VpnConnect.Net
 
         string pingResultStr;
 
-        public TcpPingWrapper(string procName, string pingTarget, int tcpPort) : base(originalExternalPingProcName, procName,  pingTarget)
+        public TcpPingerWrapper(string procName, string pingTarget, int tcpPort) : base(originalExternalPingProcName, procName, pingTarget)
         {
             this.tcpPort = tcpPort;
         }
@@ -63,12 +63,12 @@ namespace VpnConnect.Net
             return JsonSerializer.Deserialize<PingResult>(pingResultStr);
         }
 
-        public void StopPinging() 
+        public void StopPinging()
         {
             consoleWriter.WriteLine(StopCommand);
             consoleWriter.Flush();
 
-            if(!proc.WaitForExit(TcpPingExitTimeoutMs))
+            if (!proc.WaitForExit(TcpPingExitTimeoutMs))
                 throw new Exception($"Failed to stop pinger console app {GetProcName()}");
             consoleWriter.Close();
         }
