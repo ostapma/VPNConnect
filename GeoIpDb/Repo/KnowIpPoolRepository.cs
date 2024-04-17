@@ -40,7 +40,7 @@ namespace GeoIpDb.Repo
         public KnownIpPool? GetByIpAddress(string ip)
         {
             return connection.Query<KnownIpPool, IpRange, KnownIpPool>(@$"SELECT {knownIpPoolFields}
-                    FROM KnownIPPool where @ip > IPRangeStartHex and @ip < IPRangeEndHex",
+                    FROM KnownIPPool where @ip >= IPRangeStartHex and @ip <= IPRangeEndHex ORDER BY DateAdded DESC",
                     map: (knownIpPool, ipRange) =>
                     {
                         knownIpPool.IpRange = ipRange; 
@@ -70,14 +70,5 @@ namespace GeoIpDb.Repo
             knownIpPool.KnownIpPoolId = Convert.ToInt32(connection.ExecuteScalar("SELECT last_insert_rowid()"));
 
         }
-
-
-        public void Update(KnownIpPool knownIpPool)
-        {
-            throw new NotImplementedException();
-        }
-
-
-
     }
 }

@@ -16,13 +16,16 @@ namespace VpnConnect.Console.Presenters
         private readonly ExternalIpServiceProvider externalIpServiceProvider;
         private readonly GeoIpCityRepository geoIpCityRepository;
         private readonly GeoIpAsnRepository geoIpAsnRepository;
+        private KnownIpPoolRepository knownIpRepository;
         IpInfoView view;
         public IpInfoPresenter(ExternalIpServiceProvider externalIpServiceProvider,
-            GeoIpCityRepository geoIpCityRepository, GeoIpAsnRepository geoIpAsnRepository) { 
+            GeoIpCityRepository geoIpCityRepository, GeoIpAsnRepository geoIpAsnRepository,
+            KnownIpPoolRepository knownIpRepository) { 
             view= new IpInfoView();
             this.externalIpServiceProvider = externalIpServiceProvider;
             this.geoIpCityRepository = geoIpCityRepository;
             this.geoIpAsnRepository = geoIpAsnRepository;
+            this.knownIpRepository = knownIpRepository;
         }
 
 
@@ -66,6 +69,9 @@ namespace VpnConnect.Console.Presenters
             if (asnInfo != null)
                 view.ShowOwnerIpInfo(ip, asnInfo.Asn.Name);
             else view.ShowOwnerInfoNotFound(ip);
+            var knownIpInfo = knownIpRepository.GetByIpAddress(ip);
+            if (knownIpInfo != null)
+                view.ShowKnownIpInfo(knownIpInfo.DateAdded, knownIpInfo.Comments, knownIpInfo.IsBlacklisted, knownIpInfo.IsGood);
         }
 
         

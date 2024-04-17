@@ -17,6 +17,7 @@ namespace VpnConnect.Console.Commands
             rootCommand.AddCommand(new VpnSearchCommandBuilder().Build());
             rootCommand.AddCommand(new IpInfoCommandBuilder().Build());
             rootCommand.AddCommand(new NetmonCommandBuilder().Build());
+            rootCommand.AddCommand(new IpMarkCommand().Build());
         }
 
         public void Execute(string commandLine) {

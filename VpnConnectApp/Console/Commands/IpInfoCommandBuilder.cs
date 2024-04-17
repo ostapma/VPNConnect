@@ -28,7 +28,8 @@ namespace VpnConnect.Console.Commands
                 IpInfoPresenter ipInfoPresenter = new IpInfoPresenter(
                     new VPNConnect.Net.ExternalIpServiceProvider(ConfigManager.Get().Settings().ExternalIpServiceLink),
                     new GeoIpDb.Repo.GeoIpCityRepository(ConfigManager.Get().Settings().GeoIpDbSettings.ConnectionString),
-                    new GeoIpDb.Repo.GeoIpAsnRepository(ConfigManager.Get().Settings().GeoIpDbSettings.ConnectionString));
+                    new GeoIpDb.Repo.GeoIpAsnRepository(ConfigManager.Get().Settings().GeoIpDbSettings.ConnectionString),
+                    new GeoIpDb.Repo.KnownIpPoolRepository(ConfigManager.Get().Settings().GeoIpDbSettings.ConnectionString));
                 ipInfoPresenter.IpInfo(ipOptionValue);
             },option);
             return command;
