@@ -51,7 +51,7 @@ namespace VpnConnect.Console.Views
         internal void ShowKnownIpInfo(DateTime dateAdded, string comments, bool isBlacklisted, bool isGood)
         {
             AnsiConsole.MarkupLine($"This IP marked in our DB as:");
-            AnsiConsole.MarkupLine($"  Added [green]{dateAdded.Date}[/]");
+            AnsiConsole.MarkupLine($"  Added [green]{dateAdded}[/]");
             if(isBlacklisted) AnsiConsole.MarkupLine("  [green]Blacklisted[/]");
             if (isGood) AnsiConsole.MarkupLine("  [green]Good[/]");
             if(!string.IsNullOrEmpty(comments)) AnsiConsole.MarkupLine($"  [green]{comments}[/]");

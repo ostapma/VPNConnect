@@ -22,11 +22,13 @@ namespace VpnConnect.Console.Commands
         public override Command Build()
         {
             var command = new Command(Name, Description);
-            Option<int> blacklistOption = new Option<int>(new string[] { "blacklisted", "--b" });
+            Option<bool> blacklistOption = new Option<bool>(new string[] { "--blacklisted", "-b" });
+            blacklistOption.Arity = ArgumentArity.Zero;
             command.AddOption(blacklistOption);
-            Option<int> goodOption = new Option<int>(new string[] { "good", "--g" });
+            Option<bool> goodOption = new Option<bool>(new string[] { "--good", "-g" });
+            goodOption.Arity = ArgumentArity.Zero;
             command.AddOption(goodOption);
-            Option<string?> commentOption = new Option<string?>(new string[] { "comment", "--c" });
+            Option<string?> commentOption = new Option<string?>(new string[] { "--comment", "-c" });
             command.AddOption(commentOption);
             command.SetHandler((blo, go, co) =>
             {
@@ -42,11 +44,12 @@ namespace VpnConnect.Console.Commands
                         {
                             ApplicationId = ConfigManager.Get().Settings().TargetApplicationSettings.ApplicationId,
                             Comments = co,
-                            IsBlacklisted = blo == 1,
-                            IsGood = go == 1,
+                            IsBlacklisted = blo,
+                            IsGood = go,
                             IpRange = new GeoIpDb.Entities.IpRange { IpRangeStart = ipParsed.ToString(), IpRangeEnd = ipParsed.ToString() }
 
                         });
+                        AnsiConsole.MarkupLine($"IP address [green]{ipParsed}[/] has been marked in our database");
                     }
                     else
                     {
