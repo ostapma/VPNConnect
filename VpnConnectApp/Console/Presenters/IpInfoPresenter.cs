@@ -71,7 +71,8 @@ namespace VpnConnect.Console.Presenters
             else view.ShowOwnerInfoNotFound(ip);
             var knownIpInfo = knownIpRepository.GetByIpAddress(ip);
             if (knownIpInfo != null)
-                view.ShowKnownIpInfo(knownIpInfo.DateAdded, knownIpInfo.Comments, knownIpInfo.IsBlacklisted, knownIpInfo.IsGood);
+                view.ShowMarkedIpInfo(knownIpInfo.DateAdded, knownIpInfo.Comments, knownIpInfo.IsBlacklisted, knownIpInfo.IsGood);
+            else view.ShowNotMarkedIpInfo();
         }
 
         

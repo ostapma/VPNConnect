@@ -48,13 +48,18 @@ namespace VpnConnect.Console.Views
             AnsiConsole.MarkupLine($"Owner: [green]{owner}[/]");
         }
 
-        internal void ShowKnownIpInfo(DateTime dateAdded, string comments, bool isBlacklisted, bool isGood)
+        internal void ShowMarkedIpInfo(DateTime dateAdded, string comments, bool isBlacklisted, bool isGood)
         {
             AnsiConsole.MarkupLine($"This IP marked in our DB as:");
             AnsiConsole.MarkupLine($"  Added [green]{dateAdded}[/]");
             if(isBlacklisted) AnsiConsole.MarkupLine("  [green]Blacklisted[/]");
             if (isGood) AnsiConsole.MarkupLine("  [green]Good[/]");
             if(!string.IsNullOrEmpty(comments)) AnsiConsole.MarkupLine($"  [green]{comments}[/]");
+        }
+
+        internal void ShowNotMarkedIpInfo()
+        {
+            AnsiConsole.MarkupLine("Not marked in our DB");
         }
     }
 }

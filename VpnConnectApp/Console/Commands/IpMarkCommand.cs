@@ -49,7 +49,7 @@ namespace VpnConnect.Console.Commands
                             IpRange = new GeoIpDb.Entities.IpRange { IpRangeStart = ipParsed.ToString(), IpRangeEnd = ipParsed.ToString() }
 
                         });
-                        AnsiConsole.MarkupLine($"IP address [green]{ipParsed}[/] has been marked in our database");
+                        AnsiConsole.MarkupLine($"IP address [green]{ipParsed}[/] has been marked in our database as: good = {go}; blacklisted = {blo}; {co}");
                     }
                     else
                     {
