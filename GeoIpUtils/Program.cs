@@ -17,7 +17,7 @@ Console.ReadKey();
 
 Console.WriteLine("Populating cities IP address ranges converted to HEX for speeding up searches");
 
-//convertor.ConvertForCity();
+convertor.ConvertForCity();
 
 Console.WriteLine("Populating ASN IP address ranges converted to HEX for speeding up searches");
 

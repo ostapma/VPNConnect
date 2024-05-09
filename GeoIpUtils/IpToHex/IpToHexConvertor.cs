@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Serilog;
 using VPNConnect.Net;
 using GeoIpDb.Repo;
+using System.Net;
 
 namespace GeoIpUtils.IpToHex
 {
@@ -20,14 +21,14 @@ namespace GeoIpUtils.IpToHex
             this.connectionString = connectionString;
         }
 
-        int pageSize = 1000;
+        int pageSize = 10000;
         private readonly string connectionString;
 
         public void ConvertForCity()
         {
             var geoIpRepository = new GeoIpCityRepository(connectionString);
-            //geoIpRepository.SetSynchronousModeOff();
-            var page = geoIpRepository.GetPage(144000, pageSize);
+            geoIpRepository.SetSynchronousModeOff();
+            var page = geoIpRepository.GetPage(0, pageSize);
 
             do
             {
@@ -37,7 +38,8 @@ namespace GeoIpUtils.IpToHex
 
                     foreach (var cityIp in page)
                     {
-                        geoIpRepository.UpdateHexIp(cityIp.CityIpId, cityIp.IpRange);
+                        if(IPAddress.Parse(cityIp.IpRange.IpRangeStart).AddressFamily==System.Net.Sockets.AddressFamily.InterNetwork)
+                            geoIpRepository.UpdateHexIp(cityIp.CityIpId, cityIp.IpRange);
                     }
                     page = geoIpRepository.GetPage(page.Last().CityIpId, pageSize);
                 }
@@ -47,7 +49,7 @@ namespace GeoIpUtils.IpToHex
         public void ConvertForAsn()
         {
             var geoIpRepository = new GeoIpAsnRepository(connectionString);
-            //geoIpRepository.SetSynchronousModeOff();
+            geoIpRepository.SetSynchronousModeOff();
 
             var page = geoIpRepository.GetPage(0, pageSize);
 
@@ -59,7 +61,8 @@ namespace GeoIpUtils.IpToHex
 
                     foreach (var asnIp in page)
                     {
-                        geoIpRepository.UpdateHexIp(asnIp.AsnIpId, asnIp.IpRange);
+                        if (IPAddress.Parse(asnIp.IpRange.IpRangeStart).AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
+                            geoIpRepository.UpdateHexIp(asnIp.AsnIpId, asnIp.IpRange);
                     }
                     page = geoIpRepository.GetPage(page.Last().AsnIpId, pageSize);
                 }

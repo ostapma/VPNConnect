@@ -12,10 +12,10 @@ namespace GeoIpDb.Repo
     {
         protected SqliteConnection connection;
 
-        //public void SetSynchronousModeOff()
-        //{
-        //    connection.Execute("PRAGMA synchronous=OFF");
-        //}
+        public void SetSynchronousModeOff()
+        {
+            connection.Execute("PRAGMA synchronous=OFF");
+        }
         public RepositoryBase(string connectionString)
         {
 
