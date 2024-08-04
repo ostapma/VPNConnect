@@ -19,7 +19,6 @@ namespace GeoIpDb.Repo
         public RepositoryBase(string connectionString)
         {
             connection = new SqliteConnection(connectionString);
-            Console.Write(Path.GetFullPath(connection.DataSource));
         }
 
         public void Dispose()
