@@ -12,16 +12,18 @@ namespace VpnConnect.Console.Presenters
     internal class NetmonPresenter
     {
         private readonly string pingTarget;
+        private readonly bool pingBypass;
         NetmonView view;
         bool isStarted = false;
         const int latencyRows = 10;
         const int dataBufferSize = 100;
         NetmonData data = new NetmonData(dataBufferSize);
 
-        public NetmonPresenter(string pingTarget)
+        public NetmonPresenter(string pingTarget, bool pingBypass)
         {
-            view =  new NetmonView(data, latencyRows);
+            view =  new NetmonView(data, latencyRows, pingBypass);
             this.pingTarget = pingTarget;
+            this.pingBypass = pingBypass;
         }
 
         public void Monitor()
@@ -29,10 +31,11 @@ namespace VpnConnect.Console.Presenters
             isStarted = true;
             Task.Factory.StartNew(() =>
             {
-                IPinger icmpPinger = new IcmpPinger(pingTarget);
-                TcpPingerWrapper pingWrapperBypass = new TcpPingerWrapper("Bypass", pingTarget, 80);
-                icmpPinger.StartPinging();
-                pingWrapperBypass.StartPinging();
+                List<IPinger> pingers = [new IcmpPinger(pingTarget)];
+                if (pingBypass) pingers.Add(new TcpPingerWrapper("Bypass", pingTarget, 80));
+                foreach (IPinger pinger in pingers) {
+                    pinger.StartPinging();
+                }
                 while (isStarted)
                 {
                     data.TimeStamp= DateTime.Now;
@@ -43,13 +46,16 @@ namespace VpnConnect.Console.Presenters
                         data.PingResults[i] = data.PingResults[i-1];
 
                     }
-
-                    data.PingResults[0] =(icmpPinger.GetPingResult(), pingWrapperBypass.GetPingResult());
+                    foreach (IPinger pinger in pingers) {
+                        data.PingResults[0] = [pinger.GetPingResult()];
+                    }
 
                     Thread.Sleep(1000);
                 }
-                icmpPinger.StopPinging();
-                pingWrapperBypass.StopPinging();
+                foreach (IPinger pinger in pingers)
+                {
+                    pinger.StopPinging();
+                }
             });
 
             view.ShowMonitor(Stop);

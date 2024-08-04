@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.CommandLine;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -21,13 +22,15 @@ namespace VpnConnect.Console.Commands
         public override Command Build()
         {
             var command = new Command(Name, Description);
+            Option<bool> bypassOption = new Option<bool>(new string[] { "--bypass", "-b" }, "bypass vpn to ping (needs setup, check docs for more info)");
+            bypassOption.Arity = ArgumentArity.Zero;
+            command.AddOption(bypassOption);
 
-
-            command.SetHandler(() =>
+            command.SetHandler((bp) =>
             {
-                NetmonPresenter netmonPresenter = new NetmonPresenter(ConfigManager.Get().Settings().NetAnanlyzeSettings.PingTarget);
+                NetmonPresenter netmonPresenter = new NetmonPresenter(ConfigManager.Get().Settings().NetAnanlyzeSettings.PingTarget, bp);
                 netmonPresenter.Monitor();
-            });
+            }, bypassOption);
             return command;
         }
     }

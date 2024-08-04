@@ -13,10 +13,10 @@ namespace VpnConnect.Console.Views
     {
         public NetmonData(int resultBufferSize)
         {
-            PingResults = new (PingResult vpnPing, PingResult bypassPing)?[resultBufferSize];
+            PingResults = new List<PingResult>[resultBufferSize];
         }
         public DateTime TimeStamp { get; set; }
-        public (PingResult vpnPing, PingResult bypassPing )?[] PingResults { get; private set; }
+        public List<PingResult>[] PingResults { get; private set; }
         public int TolerableLatency { get; set; }
     }
 
@@ -24,12 +24,14 @@ namespace VpnConnect.Console.Views
     {
         private const int RefreshRateMs = 1000;
         private readonly int rowsToShow;
+        private readonly bool showBypass;
         private bool isActive;
 
-        public NetmonView(NetmonData dataToShow, int rowsToShow)
+        public NetmonView(NetmonData dataToShow, int rowsToShow, bool showBypass)
         {
             this.dataToShow = dataToShow;
             this.rowsToShow = rowsToShow;
+            this.showBypass = showBypass;
         }
 
 
@@ -54,9 +56,12 @@ namespace VpnConnect.Console.Views
             table.Border(TableBorder.Horizontal);
             table.AddColumn(new TableColumn("Time"));
             table.AddColumn(new TableColumn("|"));
-            table.AddColumn(new TableColumn("Latency Vpn"));
-            table.AddColumn(new TableColumn("|"));
-            table.AddColumn(new TableColumn("Latency Bypass"));
+            table.AddColumn(new TableColumn("Latency Direct"));
+            if (showBypass)
+            {
+                table.AddColumn(new TableColumn("|"));
+                table.AddColumn(new TableColumn("Latency Bypass"));
+            }
 
             for (int i = 0; i < rowsToShow; i++)
             {
@@ -83,19 +88,19 @@ namespace VpnConnect.Console.Views
 
                                 int i = 0;
                                 foreach (var result in dataToShow.PingResults.Where(pr => pr is not null).ToList()
-                                    .OrderByDescending(r => r.Value.vpnPing.PingTime).Take<(PingResult vpnPing, PingResult bypassPing)?>(rowsToShow))
+                                    .OrderByDescending(r => r.First().PingTime).Take(rowsToShow))
                                 {
                                     if (i == 0)
                                     {
-                                        table.UpdateCell(i, 0, $"[white]{result.Value.vpnPing.PingTime}[/]");
-                                        table.UpdateCell(i, 2, $"[green]{GetLatencyStr(result.Value.vpnPing)}[/]");
-                                        table.UpdateCell(i, 4, $"[blue]{GetLatencyStr(result.Value.bypassPing)}[/]");
+                                        table.UpdateCell(i, 0, $"[white]{result.First().PingTime}[/]");
+                                        table.UpdateCell(i, 2, $"[green]{GetLatencyStr(result.First())}[/]");
+                                        if(showBypass) table.UpdateCell(i, 4, $"[blue]{GetLatencyStr(result.Last())}[/]");
                                     }
                                     else
                                     {
-                                        table.UpdateCell(i, 0, result.Value.vpnPing.PingTime.ToString());
-                                        table.UpdateCell(i, 2, GetLatencyStr(result.Value.vpnPing));
-                                        table.UpdateCell(i, 4, GetLatencyStr(result.Value.bypassPing));
+                                        table.UpdateCell(i, 0, result.First().PingTime.ToString());
+                                        table.UpdateCell(i, 2, GetLatencyStr(result.First()));
+                                        if (showBypass) table.UpdateCell(i, 4, GetLatencyStr(result.Last()));
                                     }
                                     i++;
                                 }
