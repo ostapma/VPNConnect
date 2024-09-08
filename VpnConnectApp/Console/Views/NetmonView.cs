@@ -87,7 +87,7 @@ namespace VpnConnect.Console.Views
                             {
 
                                 int i = 0;
-                                foreach (var result in dataToShow.PingResults.Where(pr => pr is not null).ToList()
+                                foreach (var result in dataToShow.PingResults.Where(pr => pr is not null && pr.Count>0).ToList()
                                     .OrderByDescending(r => r.First().PingTime).Take(rowsToShow))
                                 {
                                     if (i == 0)

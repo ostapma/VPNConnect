@@ -46,8 +46,9 @@ namespace VpnConnect.Console.Presenters
                         data.PingResults[i] = data.PingResults[i-1];
 
                     }
+                    data.PingResults[0] = new List<VPNConnect.Net.PingResult>();
                     foreach (IPinger pinger in pingers) {
-                        data.PingResults[0] = [pinger.GetPingResult()];
+                        data.PingResults[0].Add(pinger.GetPingResult());
                     }
 
                     Thread.Sleep(1000);
