@@ -16,7 +16,7 @@ namespace VpnConnect.Console.Presenters
         NetmonView view;
         bool isStarted = false;
         const int latencyRows = 10;
-        const int dataBufferSize = 100;
+        const int dataBufferSize = 10;
         NetmonData data = new NetmonData(dataBufferSize);
 
         public NetmonPresenter(string pingTarget, bool pingBypass)
@@ -38,18 +38,16 @@ namespace VpnConnect.Console.Presenters
                 }
                 while (isStarted)
                 {
-                    data.TimeStamp= DateTime.Now;
-
-                    
-                    for (int i = data.PingResults.Length-1; i > 0; i--)
-                    {
-                        data.PingResults[i] = data.PingResults[i-1];
-
-                    }
-                    data.PingResults[0] = new List<VPNConnect.Net.PingResult>();
+                    data.TimeStamp = DateTime.Now;
+                 
+                    var pingResults = new List<VPNConnect.Net.PingResult>();
                     foreach (IPinger pinger in pingers) {
-                        data.PingResults[0].Add(pinger.GetPingResult());
+                        pingResults.Add (pinger.GetPingResult());
                     }
+                    data.PingResults.Add(pingResults);
+
+                    if (data.PingResults.Count >= dataBufferSize)
+                        data.PingResults.Take();
 
                     Thread.Sleep(1000);
                 }

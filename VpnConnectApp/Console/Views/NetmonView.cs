@@ -1,5 +1,6 @@
 ﻿using Spectre.Console;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.NetworkInformation;
@@ -13,10 +14,10 @@ namespace VpnConnect.Console.Views
     {
         public NetmonData(int resultBufferSize)
         {
-            PingResults = new List<PingResult>[resultBufferSize];
+            PingResults = new BlockingCollection<List<PingResult>>();
         }
         public DateTime TimeStamp { get; set; }
-        public List<PingResult>[] PingResults { get; private set; }
+        public BlockingCollection<List<PingResult>> PingResults { get; private set; }
         public int TolerableLatency { get; set; }
     }
 
